@@ -1,0 +1,87 @@
+// app/contact/page.tsx
+"use client";
+
+import { useState } from 'react';
+
+export default function ContactPage() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [subject, setSubject] = useState(''); // État pour le sujet
+  const [message, setMessage] = useState('');
+  const [status, setStatus] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus(null);
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, subject, message }), // Inclure le sujet dans le corps de la requête
+      });
+
+      if (response.ok) {
+        setStatus('Message envoyé avec succès!');
+        setName('');
+        setEmail('');
+        setSubject(''); // Réinitialiser le sujet
+        setMessage('');
+      } else {
+        setStatus("Erreur lors de l'envoi du message.");
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      setStatus("Erreur lors de l'envoi du message.");
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-center w-full h-[calc(100vh-5rem)] overflow-auto"> {/* Ajustez la hauteur en fonction de la navbar */}
+      <div className="p-8 max-w-lg w-full bg-opacity-20 bg-black backdrop-blur-md rounded-lg shadow-lg border border-gray-700 overflow-auto max-h-[90vh]"> {/* Ajout d'une hauteur maximale et d'un débordement */}
+        <h2 className="text-4xl font-bold mb-6 text-center text-white drop-shadow-lg">Contactez-moi</h2>
+        <form onSubmit={handleSubmit} className="space-y-4 flex flex-col">
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Nom"
+            className="w-full p-3 bg-black bg-opacity-50 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-lg"
+            required
+          />
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            className="w-full p-3 bg-black bg-opacity-50 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-lg"
+            required
+          />
+          <input
+            type="text"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder="Sujet"
+            className="w-full p-3 bg-black bg-opacity-50 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-lg"
+            required
+          />
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Message"
+            className="w-full p-3 bg-black bg-opacity-50 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-lg"
+            style={{ minHeight: '100px' }} // Définir une taille minimale
+            required
+          />
+          <button
+            type="submit"
+            className="w-full p-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-lg"
+          >
+            Envoyer
+          </button>
+        </form>
+        {status && <p className="mt-4 text-center text-white">{status}</p>}
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,20 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db" // Spécifie le chemin du fichier de base de données
+}
+
+// Exemple de modèle de projet
+model Project {
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String
+  category    String
+  imageUrl    String
+  createdAt   DateTime @default(now())
+}

@@ -1,0 +1,10 @@
+/* styles/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Ajoutez des styles personnalisés ici si besoin */
+body {
+    background: url('/images/nebuleuse-coloree-etoiles-nebuleuse-arriere-plan_910054-24675.jpg') no-repeat center center fixed;
+    background-size: cover;
+}
