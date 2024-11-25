@@ -1,2 +1,9 @@
-site/node_modules
-site/.env
+**/node_modules/
+venv
+.venv
+**/.env
+.vscode
+.idea
+**/cache/
+**/temp/
+**/.next/
