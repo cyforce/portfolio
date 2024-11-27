@@ -5,11 +5,12 @@ import nodemailer from 'nodemailer';
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT),
-  secure: false, // Utilisez 'true' si le port est 465 (SSL/TLS)
+  secure: Number(process.env.SMTP_PORT) === 465,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  name: 'mail.cyclonicforce.fr', // Utilisez un nom de domaine valide ici
   tls: {
     rejectUnauthorized: false,
   },
