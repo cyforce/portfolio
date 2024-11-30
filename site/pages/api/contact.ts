@@ -21,9 +21,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ message: 'Méthode non autorisée' });
   }
 
-  const { name, email, message } = req.body;
+  const { name, email, subject, message } = req.body;
 
-  if (!name || !email || !message) {
+  if (!name || !email || !subject || !message) {
     return res.status(400).json({ message: 'Tous les champs sont requis' });
   }
 
@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await transporter.sendMail({
       from: process.env.SMTP_FROM,
       to: 'celian.touzeau@outlook.fr', // Destinataire du message (peut être ton e-mail)
-      subject: `Nouveau message de ${name}`,
+      subject: `Nouveau message de ${name} pour ${subject}`,
       text: message,
       html: `
         <p><strong>Nom:</strong> ${name}</p>
