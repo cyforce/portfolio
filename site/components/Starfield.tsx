@@ -1,4 +1,3 @@
-// components/Starfield.tsx
 "use client"; // Client component
 
 import { useEffect, useState } from 'react';
@@ -12,7 +11,11 @@ const generateStarPositions = (count: number) => {
 };
 
 export default function Starfield() {
-  const [starPositions, setStarPositions] = useState(() => generateStarPositions(150));
+  const [starPositions, setStarPositions] = useState<{ left: string; top: string }[]>([]);
+
+  useEffect(() => {
+    setStarPositions(generateStarPositions(150)); // Déclenché uniquement côté client
+  }, []);
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
