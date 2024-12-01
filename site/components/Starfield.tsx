@@ -5,19 +5,19 @@ import { useEffect, useState } from "react";
 // Génère les positions initiales des étoiles
 const generateStarData = (count: number) => {
   return Array.from({ length: count }).map(() => ({
-    left: Math.random() * window.innerWidth,
-    top: Math.random() * window.innerHeight,
-    originalLeft: Math.random() * window.innerWidth, // Position originale
-    originalTop: Math.random() * window.innerHeight, // Position originale
-    velocityX: 0, // Vitesse initiale nulle
-    velocityY: 0, // Vitesse initiale nulle
+    left: Math.random() * window.innerWidth, // Position aléatoire X
+    top: Math.random() * window.innerHeight, // Position aléatoire Y
+    originalLeft: Math.random() * window.innerWidth, // Position d'origine X
+    originalTop: Math.random() * window.innerHeight, // Position d'origine Y
     isEscaping: false, // Indique si l'étoile s'écarte du curseur
+    offsetX: 0, // Déplacement X (pour écartement)
+    offsetY: 0, // Déplacement Y (pour écartement)
   }));
 };
 
 export default function Starfield() {
   const [stars, setStars] = useState<
-    { left: number; top: number; originalLeft: number; originalTop: number; velocityX: number; velocityY: number; isEscaping: boolean }[]
+    { left: number; top: number; originalLeft: number; originalTop: number; isEscaping: boolean; offsetX: number; offsetY: number }[]
   >([]);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({
     x: 0,
@@ -26,8 +26,8 @@ export default function Starfield() {
 
   const [isClient, setIsClient] = useState(false); // Vérification côté client
   const exclusionRadius = 100; // Rayon d'exclusion autour du curseur
-  const escapeSpeed = 3; // Facteur d'accélération pour l'écartement des étoiles
-  const returnSpeed = 0.05; // Vitesse de retour à la position initiale
+  const escapeSpeed = 5; // Facteur d'accélération pour l'écartement des étoiles
+  const returnSpeed = 0.1; // Vitesse de retour à la position initiale
 
   // Utilisation de useEffect pour vérifier si on est côté client
   useEffect(() => {
@@ -65,17 +65,21 @@ export default function Starfield() {
               const angle = Math.atan2(dy, dx);
 
               // Écartement brusque de l'étoile
-              star.left += Math.cos(angle) * (exclusionRadius - distance) * escapeSpeed;
-              star.top += Math.sin(angle) * (exclusionRadius - distance) * escapeSpeed;
+              star.offsetX = Math.cos(angle) * (exclusionRadius - distance) * escapeSpeed;
+              star.offsetY = Math.sin(angle) * (exclusionRadius - distance) * escapeSpeed;
               star.isEscaping = true;
             } else {
               // Si l'étoile est loin du curseur, elle revient à sa position d'origine
               if (star.isEscaping) {
-                star.left += (star.originalLeft - star.left) * returnSpeed;
-                star.top += (star.originalTop - star.top) * returnSpeed;
+                star.offsetX += (star.originalLeft - star.left) * returnSpeed;
+                star.offsetY += (star.originalTop - star.top) * returnSpeed;
               }
               star.isEscaping = false; // L'étoile n'est plus en train de s'écarter
             }
+
+            // Applique l'écartement ou le retour à la position initiale
+            star.left = star.originalLeft + star.offsetX;
+            star.top = star.originalTop + star.offsetY;
 
             return { ...star };
           })
