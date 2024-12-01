@@ -1,9 +1,14 @@
 // components/Navbar.tsx
 import Link from 'next/link';
+import React from 'react';
 
-export default function Navbar() {
+interface NavbarProps {
+  className?: string;
+}
+
+export default function Navbar({ className }: NavbarProps) {
   return (
-    <nav className="fixed top-0 left-0 w-full bg-black bg-opacity-75 p-4 flex justify-center z-50"> {/* Ajout de z-50 */}
+    <nav className={`fixed top-0 left-0 w-full bg-black bg-opacity-75 p-4 flex justify-center z-50 ${className}`}>
       <div className="flex space-x-4">
         <Link href="/">Accueil</Link>
         <Link href="/a-propos">À propos</Link>

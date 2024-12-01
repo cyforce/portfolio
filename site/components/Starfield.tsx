@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+
+interface StarfieldProps {
+  className?: string;
+}
 
 const STAR_COUNT = 150;
 const EXCLUSION_RADIUS = 100; // Rayon d'exclusion autour de la souris
@@ -16,11 +20,10 @@ const generateStarData = (count: number) => {
   }));
 };
 
-export default function Starfield() {
+export default function Starfield({ className }: StarfieldProps) {
+  const [isClient, setIsClient] = useState(false);
   const [stars, setStars] = useState<{ initialX: number; initialY: number; offsetX: number; offsetY: number }[]>([]);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-
-  const [isClient, setIsClient] = useState(false); // Vérification côté client
 
   useEffect(() => {
     setIsClient(true);
@@ -94,11 +97,11 @@ export default function Starfield() {
 
   // On rend un div vide tant qu'on n'est pas côté client
   if (!isClient) {
-    return <div className="starfield" />;
+    return <div className={`starfield ${className}`} />;
   }
 
   return (
-    <div className="starfield">
+    <div className={`starfield ${className}`}>
       {stars.map((star, index) => (
         <div
           key={index}
