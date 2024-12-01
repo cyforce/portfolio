@@ -1,5 +1,3 @@
-"use client"; // Client component
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -19,63 +17,78 @@ export default function Starfield() {
     { left: number; top: number; velocityX: number; velocityY: number }[]
   >([]);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({
-    x: window.innerWidth / 2,
-    y: window.innerHeight / 2,
+    x: 0,
+    y: 0,
   });
 
+  const [isClient, setIsClient] = useState(false); // État pour vérifier si on est côté client
   const exclusionRadius = 100; // Rayon d'exclusion autour du pointeur
   const minDistance = 50; // Distance minimale entre chaque étoile et le pointeur
 
+  // Utilisation de useEffect pour vérifier si le code est exécuté côté client
   useEffect(() => {
-    setStars(generateStarData(150)); // Génération des étoiles au chargement de la page
-
-    // Gestion des mouvements de la souris
-    const handleMouseMove = (event: MouseEvent) => {
-      setMousePosition({ x: event.clientX, y: event.clientY });
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-    };
+    setIsClient(true);
   }, []);
 
   useEffect(() => {
-    const updateStars = () => {
-      setStars((prevStars) =>
-        prevStars.map((star) => {
-          // Calcule la distance entre l'étoile et la souris
-          const dx = star.left - mousePosition.x;
-          const dy = star.top - mousePosition.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
+    if (isClient) {
+      setStars(generateStarData(150)); // Génération des étoiles au chargement de la page
 
-          // Si l'étoile est trop proche du pointeur, elle est repoussée
-          if (distance < exclusionRadius) {
-            const angle = Math.atan2(dy, dx);
-            star.left += Math.cos(angle) * (exclusionRadius - distance);
-            star.top += Math.sin(angle) * (exclusionRadius - distance);
-          }
+      // Gestion des mouvements de la souris
+      const handleMouseMove = (event: MouseEvent) => {
+        setMousePosition({ x: event.clientX, y: event.clientY });
+      };
+      window.addEventListener("mousemove", handleMouseMove);
 
-          // Mise à jour de la position des étoiles avec des mouvements aléatoires
-          let newLeft = star.left + star.velocityX;
-          let newTop = star.top + star.velocityY;
+      return () => {
+        window.removeEventListener("mousemove", handleMouseMove);
+      };
+    }
+  }, [isClient]);
 
-          // Gère les collisions avec les bords de l'écran
-          if (newLeft < 0 || newLeft > window.innerWidth) star.velocityX *= -1;
-          if (newTop < 0 || newTop > window.innerHeight) star.velocityY *= -1;
+  useEffect(() => {
+    if (isClient) {
+      const updateStars = () => {
+        setStars((prevStars) =>
+          prevStars.map((star) => {
+            // Calcule la distance entre l'étoile et la souris
+            const dx = star.left - mousePosition.x;
+            const dy = star.top - mousePosition.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
 
-          newLeft = Math.max(0, Math.min(window.innerWidth, newLeft));
-          newTop = Math.max(0, Math.min(window.innerHeight, newTop));
+            // Si l'étoile est trop proche du pointeur, elle est repoussée
+            if (distance < exclusionRadius) {
+              const angle = Math.atan2(dy, dx);
+              star.left += Math.cos(angle) * (exclusionRadius - distance);
+              star.top += Math.sin(angle) * (exclusionRadius - distance);
+            }
 
-          return { ...star, left: newLeft, top: newTop };
-        })
-      );
+            // Mise à jour de la position des étoiles avec des mouvements aléatoires
+            let newLeft = star.left + star.velocityX;
+            let newTop = star.top + star.velocityY;
+
+            // Gère les collisions avec les bords de l'écran
+            if (newLeft < 0 || newLeft > window.innerWidth) star.velocityX *= -1;
+            if (newTop < 0 || newTop > window.innerHeight) star.velocityY *= -1;
+
+            newLeft = Math.max(0, Math.min(window.innerWidth, newLeft));
+            newTop = Math.max(0, Math.min(window.innerHeight, newTop));
+
+            return { ...star, left: newLeft, top: newTop };
+          })
+        );
+
+        requestAnimationFrame(updateStars);
+      };
 
       requestAnimationFrame(updateStars);
-    };
+    }
+  }, [mousePosition, isClient]);
 
-    requestAnimationFrame(updateStars);
-  }, [mousePosition]);
+  // On rend un div vide tant qu'on n'est pas côté client
+  if (!isClient) {
+    return <div className="starfield" />;
+  }
 
   return (
     <div className="starfield">

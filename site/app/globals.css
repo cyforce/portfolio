@@ -6,7 +6,6 @@
 /* Starfield Background */
 body {
   position: relative;
-  background-color: #000; /* Fond noir */
   overflow: hidden;
 }
 
