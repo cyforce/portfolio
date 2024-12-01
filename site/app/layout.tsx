@@ -11,8 +11,8 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="fr">
+      <Starfield /> {/* Ajout du fond étoilé */}
       <body className="bg-gray-900 text-white font-sans flex flex-col min-h-screen">
-        <Starfield /> {/* Ajout du fond étoilé */}
         <Navbar />
         <main className="flex-grow p-6 mt-8">
           {children}
