@@ -9,9 +9,9 @@ const generateStarData = (count: number) => {
     top: Math.random() * window.innerHeight, // Position aléatoire Y
     originalLeft: Math.random() * window.innerWidth, // Position d'origine X
     originalTop: Math.random() * window.innerHeight, // Position d'origine Y
-    isEscaping: false, // Indique si l'étoile s'écarte du curseur
     offsetX: 0, // Déplacement X (pour écartement)
     offsetY: 0, // Déplacement Y (pour écartement)
+    isEscaping: false, // Indique si l'étoile s'écarte du curseur
   }));
 };
 
@@ -27,7 +27,7 @@ export default function Starfield() {
   const [isClient, setIsClient] = useState(false); // Vérification côté client
   const exclusionRadius = 100; // Rayon d'exclusion autour du curseur
   const escapeSpeed = 5; // Facteur d'accélération pour l'écartement des étoiles
-  const returnSpeed = 0.1; // Vitesse de retour à la position initiale
+  const returnSpeed = 0.05; // Vitesse de retour à la position initiale
 
   // Utilisation de useEffect pour vérifier si on est côté client
   useEffect(() => {
@@ -69,10 +69,11 @@ export default function Starfield() {
               star.offsetY = Math.sin(angle) * (exclusionRadius - distance) * escapeSpeed;
               star.isEscaping = true;
             } else {
-              // Si l'étoile est loin du curseur, elle revient à sa position d'origine
+              // Si l'étoile est loin du curseur, elle revient lentement à sa position d'origine
               if (star.isEscaping) {
-                star.offsetX += (star.originalLeft - star.left) * returnSpeed;
-                star.offsetY += (star.originalTop - star.top) * returnSpeed;
+                // Retour lent vers la position d'origine
+                star.offsetX += (star.originalLeft - (star.left + star.offsetX)) * returnSpeed;
+                star.offsetY += (star.originalTop - (star.top + star.offsetY)) * returnSpeed;
               }
               star.isEscaping = false; // L'étoile n'est plus en train de s'écarter
             }
