@@ -1,25 +1,18 @@
-// components/Starfield.tsx
-"use client"; // Client component
+import { useState, useEffect } from 'react';
 
-import { useEffect } from 'react';
+export default function MyComponent() {
+  const [position, setPosition] = useState({ left: '50vw', top: '50vh' });
 
-export default function Starfield() {
   useEffect(() => {
-    // Gestion des mouvements de la souris
-    const handleMouseMove = (event: MouseEvent) => {
-      document.documentElement.style.setProperty('--mouse-x', `${event.clientX}px`);
-      document.documentElement.style.setProperty('--mouse-y', `${event.clientY}px`);
-    };
+    const randomLeft = `${Math.random() * 100}vw`;
+    const randomTop = `${Math.random() * 100}vh`;
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    setPosition({ left: randomLeft, top: randomTop });
   }, []);
 
   return (
-    <div className="starfield">
-      {[...Array(150)].map((_, index) => (
-        <div key={index} className="star" style={{ left: `${Math.random() * 100}vw`, top: `${Math.random() * 100}vh` }} />
-      ))}
+    <div style={{ position: 'absolute', left: position.left, top: position.top }}>
+      <h1>Hello World!</h1>
     </div>
   );
 }
