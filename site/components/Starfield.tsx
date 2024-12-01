@@ -7,25 +7,26 @@ const generateStarData = (count: number) => {
   return Array.from({ length: count }).map(() => ({
     left: Math.random() * window.innerWidth,
     top: Math.random() * window.innerHeight,
-    velocityX: (Math.random() - 0.5) * 0.5, // Vitesse aléatoire horizontale
-    velocityY: (Math.random() - 0.5) * 0.5, // Vitesse aléatoire verticale
+    velocityX: (Math.random() - 0.5) * 0.1, // Petite vitesse horizontale
+    velocityY: (Math.random() - 0.5) * 0.1, // Petite vitesse verticale
+    isEscaping: false, // Indicateur si l'étoile s'écarte du curseur
   }));
 };
 
 export default function Starfield() {
   const [stars, setStars] = useState<
-    { left: number; top: number; velocityX: number; velocityY: number }[]
+    { left: number; top: number; velocityX: number; velocityY: number; isEscaping: boolean }[]
   >([]);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({
     x: 0,
     y: 0,
   });
 
-  const [isClient, setIsClient] = useState(false); // État pour vérifier si on est côté client
+  const [isClient, setIsClient] = useState(false); // Vérification côté client
   const exclusionRadius = 100; // Rayon d'exclusion autour du pointeur
   const minDistance = 50; // Distance minimale entre chaque étoile et le pointeur
 
-  // Utilisation de useEffect pour vérifier si le code est exécuté côté client
+  // Utilisation de useEffect pour vérifier si on est côté client
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -56,14 +57,21 @@ export default function Starfield() {
             const dy = star.top - mousePosition.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            // Si l'étoile est trop proche du pointeur, elle est repoussée
-            if (distance < exclusionRadius) {
+            // Si l'étoile est trop proche du pointeur, elle doit s'écarter
+            if (distance < exclusionRadius && !star.isEscaping) {
               const angle = Math.atan2(dy, dx);
+              // Écartement brusque
               star.left += Math.cos(angle) * (exclusionRadius - distance);
               star.top += Math.sin(angle) * (exclusionRadius - distance);
+              star.isEscaping = true;
             }
 
-            // Mise à jour de la position des étoiles avec des mouvements aléatoires
+            // Si l'étoile est suffisamment éloignée, on rétablit son mouvement lent
+            if (star.isEscaping && distance > exclusionRadius) {
+              star.isEscaping = false;
+            }
+
+            // Mise à jour de la position des étoiles avec un petit mouvement aléatoire
             let newLeft = star.left + star.velocityX;
             let newTop = star.top + star.velocityY;
 

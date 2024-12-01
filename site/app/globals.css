@@ -5,8 +5,8 @@
 
 /* Starfield Background */
 body {
-  position: relative;
-  overflow: hidden;
+    position: relative;
+    overflow: hidden;
 }
 
 .starfield {
@@ -14,10 +14,8 @@ body {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    background-color: black;
-  }
-  
-  .star {
+}
+
+.star {
     transition: transform 0.1s;
-  }
-  
+}
