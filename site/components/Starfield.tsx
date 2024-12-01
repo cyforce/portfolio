@@ -9,13 +9,15 @@ const generateStarData = (count: number) => {
     top: Math.random() * window.innerHeight,
     velocityX: (Math.random() - 0.5) * 0.1, // Petite vitesse horizontale
     velocityY: (Math.random() - 0.5) * 0.1, // Petite vitesse verticale
+    originalVelocityX: (Math.random() - 0.5) * 0.1, // Vitesse initiale horizontale
+    originalVelocityY: (Math.random() - 0.5) * 0.1, // Vitesse initiale verticale
     isEscaping: false, // Indicateur si l'étoile s'écarte du curseur
   }));
 };
 
 export default function Starfield() {
   const [stars, setStars] = useState<
-    { left: number; top: number; velocityX: number; velocityY: number; isEscaping: boolean }[]
+    { left: number; top: number; velocityX: number; velocityY: number; originalVelocityX: number; originalVelocityY: number; isEscaping: boolean }[]
   >([]);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({
     x: 0,
@@ -25,6 +27,7 @@ export default function Starfield() {
   const [isClient, setIsClient] = useState(false); // Vérification côté client
   const exclusionRadius = 100; // Rayon d'exclusion autour du pointeur
   const minDistance = 50; // Distance minimale entre chaque étoile et le pointeur
+  const escapeSpeed = 1.5; // Facteur d'accélération pour l'écartement des étoiles
 
   // Utilisation de useEffect pour vérifier si on est côté client
   useEffect(() => {
@@ -60,6 +63,10 @@ export default function Starfield() {
             // Si l'étoile est trop proche du pointeur, elle doit s'écarter
             if (distance < exclusionRadius && !star.isEscaping) {
               const angle = Math.atan2(dy, dx);
+              // Accélération de l'étoile pour l'écarter
+              star.velocityX = star.originalVelocityX * escapeSpeed;
+              star.velocityY = star.originalVelocityY * escapeSpeed;
+
               // Écartement brusque
               star.left += Math.cos(angle) * (exclusionRadius - distance);
               star.top += Math.sin(angle) * (exclusionRadius - distance);
@@ -69,6 +76,8 @@ export default function Starfield() {
             // Si l'étoile est suffisamment éloignée, on rétablit son mouvement lent
             if (star.isEscaping && distance > exclusionRadius) {
               star.isEscaping = false;
+              star.velocityX = star.originalVelocityX; // Réinitialise la vitesse
+              star.velocityY = star.originalVelocityY; // Réinitialise la vitesse
             }
 
             // Mise à jour de la position des étoiles avec un petit mouvement aléatoire
