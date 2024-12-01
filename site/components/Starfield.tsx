@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-// Génère les positions aléatoires et les vitesses des étoiles
+// Génère les positions et les vitesses des étoiles
 const generateStarData = (count: number) => {
   return Array.from({ length: count }).map(() => ({
     left: Math.random() * window.innerWidth,
@@ -11,13 +11,14 @@ const generateStarData = (count: number) => {
     velocityY: (Math.random() - 0.5) * 0.1, // Petite vitesse verticale
     originalVelocityX: (Math.random() - 0.5) * 0.1, // Vitesse initiale horizontale
     originalVelocityY: (Math.random() - 0.5) * 0.1, // Vitesse initiale verticale
-    isEscaping: false, // Indicateur si l'étoile s'écarte du curseur
+    isEscaping: false, // Indique si l'étoile s'écarte du curseur
+    isFixed: false, // Indique si l'étoile est fixe et ne doit pas bouger
   }));
 };
 
 export default function Starfield() {
   const [stars, setStars] = useState<
-    { left: number; top: number; velocityX: number; velocityY: number; originalVelocityX: number; originalVelocityY: number; isEscaping: boolean }[]
+    { left: number; top: number; velocityX: number; velocityY: number; originalVelocityX: number; originalVelocityY: number; isEscaping: boolean; isFixed: boolean }[]
   >([]);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({
     x: 0,
@@ -25,7 +26,7 @@ export default function Starfield() {
   });
 
   const [isClient, setIsClient] = useState(false); // Vérification côté client
-  const exclusionRadius = 100; // Rayon d'exclusion autour du pointeur
+  const exclusionRadius = 100; // Rayon d'exclusion autour du curseur
   const minDistance = 50; // Distance minimale entre chaque étoile et le pointeur
   const escapeSpeed = 1.5; // Facteur d'accélération pour l'écartement des étoiles
 
@@ -60,8 +61,8 @@ export default function Starfield() {
             const dy = star.top - mousePosition.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            // Si l'étoile est trop proche du pointeur, elle doit s'écarter
-            if (distance < exclusionRadius && !star.isEscaping) {
+            // Si l'étoile est trop proche du pointeur et qu'elle n'est pas fixe, elle doit s'écarter
+            if (distance < exclusionRadius && !star.isFixed) {
               const angle = Math.atan2(dy, dx);
               // Accélération de l'étoile pour l'écarter
               star.velocityX = star.originalVelocityX * escapeSpeed;
@@ -80,16 +81,29 @@ export default function Starfield() {
               star.velocityY = star.originalVelocityY; // Réinitialise la vitesse
             }
 
-            // Mise à jour de la position des étoiles avec un petit mouvement aléatoire
-            let newLeft = star.left + star.velocityX;
-            let newTop = star.top + star.velocityY;
+            // Si l'étoile est trop éloignée du curseur, elle reste fixe
+            if (distance > exclusionRadius) {
+              star.isFixed = true;
+            } else {
+              star.isFixed = false;
+            }
 
-            // Gère les collisions avec les bords de l'écran
-            if (newLeft < 0 || newLeft > window.innerWidth) star.velocityX *= -1;
-            if (newTop < 0 || newTop > window.innerHeight) star.velocityY *= -1;
+            // Mise à jour de la position des étoiles fixes ou mobiles
+            let newLeft = star.left;
+            let newTop = star.top;
 
-            newLeft = Math.max(0, Math.min(window.innerWidth, newLeft));
-            newTop = Math.max(0, Math.min(window.innerHeight, newTop));
+            // Les étoiles fixes ne bougent pas
+            if (!star.isFixed) {
+              newLeft += star.velocityX;
+              newTop += star.velocityY;
+
+              // Gère les collisions avec les bords de l'écran
+              if (newLeft < 0 || newLeft > window.innerWidth) star.velocityX *= -1;
+              if (newTop < 0 || newTop > window.innerHeight) star.velocityY *= -1;
+
+              newLeft = Math.max(0, Math.min(window.innerWidth, newLeft));
+              newTop = Math.max(0, Math.min(window.innerHeight, newTop));
+            }
 
             return { ...star, left: newLeft, top: newTop };
           })
@@ -121,6 +135,7 @@ export default function Starfield() {
             position: "absolute",
             borderRadius: "50%",
             backgroundColor: "white",
+            opacity: star.isFixed ? 0.5 : 1, // Les étoiles fixes seront un peu transparentes
           }}
         />
       ))}
