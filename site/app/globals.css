@@ -3,8 +3,66 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Ajoutez des styles personnalisés ici si besoin */
+/* Starfield Background */
 body {
-    background: url('/images/nebuleuse-coloree-etoiles-nebuleuse-arriere-plan_910054-24675.jpg') no-repeat center center fixed;
-    background-size: cover;
+  position: relative;
+  background-color: #000; /* Fond noir */
+  overflow: hidden;
+}
+
+.starfield {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.star {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: white;
+  animation: moveStars infinite 100s linear;
+  pointer-events: none; /* Les étoiles ne captent pas les clics */
+}
+
+/* Animation des étoiles (elles se déplacent lentement dans l'espace) */
+@keyframes moveStars {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-2000px);
+  }
+}
+
+/* Changement de couleur aléatoire */
+.star:nth-child(odd) {
+  background-color: #1e90ff; /* Bleu */
+}
+
+.star:nth-child(3n) {
+  background-color: #ff7f50; /* Orange */
+}
+
+.star:nth-child(5n) {
+  background-color: #ffffff; /* Blanc */
+}
+
+/* Interaction au survol */
+body:hover .star {
+  animation: spreadOut 0.8s ease-out forwards;
+}
+
+@keyframes spreadOut {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(calc((50vw - var(--mouse-x)) * 0.05), calc((50vh - var(--mouse-y)) * 0.05)) scale(1.2);
+  }
 }
