@@ -8,7 +8,7 @@ interface StarfieldProps {
 
 const STAR_COUNT = 150;
 const EXCLUSION_RADIUS = 100; // Rayon d'exclusion autour de la souris
-const OFFSET_DIST = 50; // Décalage maximum des étoiles
+const MAX_OFFSET_DIST = 100; // Décalage maximum des étoiles
 
 // Génère les positions initiales des étoiles
 const generateStarData = (count: number) => {
@@ -22,8 +22,13 @@ const generateStarData = (count: number) => {
 
 export default function Starfield({ className }: StarfieldProps) {
   const [isClient, setIsClient] = useState(false);
-  const [stars, setStars] = useState<{ initialX: number; initialY: number; offsetX: number; offsetY: number }[]>([]);
-  const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [stars, setStars] = useState<
+    { initialX: number; initialY: number; offsetX: number; offsetY: number }[]
+  >([]);
+  const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
 
   useEffect(() => {
     setIsClient(true);
@@ -53,24 +58,17 @@ export default function Starfield({ className }: StarfieldProps) {
             const dy = star.initialY - mousePosition.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            // Si l'étoile est proche de la souris, elle se décale
-            if (distance < EXCLUSION_RADIUS) {
-              // Calcul du décalage
-              let offsetX = 0;
-              let offsetY = 0;
+            // Si l'étoile est proche de la souris, calculer un décalage proportionnel
+            if (distance < EXCLUSION_RADIUS * 3) {
+              // Calcul du ratio de la distance actuelle par rapport au rayon d'exclusion
+              const ratio = Math.min(
+                1,
+                1 - distance / (EXCLUSION_RADIUS * 3)
+              );
 
-              // Déterminer où se trouve la souris par rapport à l'étoile (gauche, droite, haut, bas)
-              if (mousePosition.x < star.initialX) {
-                offsetX = OFFSET_DIST; // À gauche
-              } else if (mousePosition.x > star.initialX) {
-                offsetX = -OFFSET_DIST; // À droite
-              }
-
-              if (mousePosition.y < star.initialY) {
-                offsetY = OFFSET_DIST; // En haut
-              } else if (mousePosition.y > star.initialY) {
-                offsetY = -OFFSET_DIST; // En bas
-              }
+              // Calcul des décalages proportionnels
+              const offsetX = Math.sign(dx) * ratio * MAX_OFFSET_DIST;
+              const offsetY = Math.sign(dy) * ratio * MAX_OFFSET_DIST;
 
               return {
                 ...star,
@@ -114,7 +112,7 @@ export default function Starfield({ className }: StarfieldProps) {
             position: "absolute",
             borderRadius: "50%",
             backgroundColor: "white",
-            transition: "all 0.1s ease-out", // Transition fluide pour les déplacements
+            transition: "all 0.2s ease-out", // Transition fluide pour les déplacements
           }}
         />
       ))}
