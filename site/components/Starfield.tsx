@@ -2,43 +2,34 @@
 
 import { useEffect, useState } from "react";
 
+const STAR_COUNT = 150;
+const EXCLUSION_RADIUS = 100; // Rayon d'exclusion autour de la souris
+const OFFSET_DIST = 50; // Décalage maximum des étoiles
+
 // Génère les positions initiales des étoiles
 const generateStarData = (count: number) => {
   return Array.from({ length: count }).map(() => ({
-    left: Math.random() * window.innerWidth, // Position aléatoire X
-    top: Math.random() * window.innerHeight, // Position aléatoire Y
-    originalLeft: Math.random() * window.innerWidth, // Position d'origine X
-    originalTop: Math.random() * window.innerHeight, // Position d'origine Y
-    offsetX: 0, // Déplacement X (pour écartement)
-    offsetY: 0, // Déplacement Y (pour écartement)
-    isEscaping: false, // Indique si l'étoile s'écarte du curseur
+    initialX: Math.random() * window.innerWidth, // Position initiale X
+    initialY: Math.random() * window.innerHeight, // Position initiale Y
+    offsetX: 0, // Décalage X
+    offsetY: 0, // Décalage Y
   }));
 };
 
 export default function Starfield() {
-  const [stars, setStars] = useState<
-    { left: number; top: number; originalLeft: number; originalTop: number; isEscaping: boolean; offsetX: number; offsetY: number }[]
-  >([]);
-  const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({
-    x: 0,
-    y: 0,
-  });
+  const [stars, setStars] = useState<{ initialX: number; initialY: number; offsetX: number; offsetY: number }[]>([]);
+  const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const [isClient, setIsClient] = useState(false); // Vérification côté client
-  const exclusionRadius = 100; // Rayon d'exclusion autour du curseur
-  const escapeSpeed = 5; // Facteur d'accélération pour l'écartement des étoiles
-  const returnSpeed = 0.05; // Vitesse de retour à la position initiale
 
-  // Utilisation de useEffect pour vérifier si on est côté client
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   useEffect(() => {
     if (isClient) {
-      setStars(generateStarData(150)); // Génération des étoiles au chargement de la page
+      setStars(generateStarData(STAR_COUNT)); // Génération des étoiles
 
-      // Gestion des mouvements de la souris
       const handleMouseMove = (event: MouseEvent) => {
         setMousePosition({ x: event.clientX, y: event.clientY });
       };
@@ -55,34 +46,42 @@ export default function Starfield() {
       const updateStars = () => {
         setStars((prevStars) =>
           prevStars.map((star) => {
-            // Calcule la distance entre l'étoile et la souris
-            const dx = star.left - mousePosition.x;
-            const dy = star.top - mousePosition.y;
+            const dx = star.initialX - mousePosition.x;
+            const dy = star.initialY - mousePosition.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            // Si l'étoile est proche du curseur, elle doit s'écarter
-            if (distance < exclusionRadius) {
-              const angle = Math.atan2(dy, dx);
+            // Si l'étoile est proche de la souris, elle se décale
+            if (distance < EXCLUSION_RADIUS) {
+              // Calcul du décalage
+              let offsetX = 0;
+              let offsetY = 0;
 
-              // Écartement brusque de l'étoile
-              star.offsetX = Math.cos(angle) * (exclusionRadius - distance) * escapeSpeed;
-              star.offsetY = Math.sin(angle) * (exclusionRadius - distance) * escapeSpeed;
-              star.isEscaping = true;
-            } else {
-              // Si l'étoile est loin du curseur, elle revient lentement à sa position d'origine
-              if (star.isEscaping) {
-                // Retour lent vers la position d'origine
-                star.offsetX += (star.originalLeft - (star.left + star.offsetX)) * returnSpeed;
-                star.offsetY += (star.originalTop - (star.top + star.offsetY)) * returnSpeed;
+              // Déterminer où se trouve la souris par rapport à l'étoile (gauche, droite, haut, bas)
+              if (mousePosition.x < star.initialX) {
+                offsetX = OFFSET_DIST; // À gauche
+              } else if (mousePosition.x > star.initialX) {
+                offsetX = -OFFSET_DIST; // À droite
               }
-              star.isEscaping = false; // L'étoile n'est plus en train de s'écarter
+
+              if (mousePosition.y < star.initialY) {
+                offsetY = OFFSET_DIST; // En haut
+              } else if (mousePosition.y > star.initialY) {
+                offsetY = -OFFSET_DIST; // En bas
+              }
+
+              return {
+                ...star,
+                offsetX,
+                offsetY,
+              };
+            } else {
+              // Si l'étoile est loin de la souris, elle revient à sa position initiale
+              return {
+                ...star,
+                offsetX: 0,
+                offsetY: 0,
+              };
             }
-
-            // Applique l'écartement ou le retour à la position initiale
-            star.left = star.originalLeft + star.offsetX;
-            star.top = star.originalTop + star.offsetY;
-
-            return { ...star };
           })
         );
 
@@ -105,14 +104,14 @@ export default function Starfield() {
           key={index}
           className="star"
           style={{
-            left: `${star.left}px`,
-            top: `${star.top}px`,
+            left: `${star.initialX + star.offsetX}px`,
+            top: `${star.initialY + star.offsetY}px`,
             width: "4px",
             height: "4px",
             position: "absolute",
             borderRadius: "50%",
             backgroundColor: "white",
-            transition: star.isEscaping ? "none" : "all 0.1s ease-out", // Pas de transition pendant l'écartement
+            transition: "all 0.1s ease-out", // Transition fluide pour les déplacements
           }}
         />
       ))}
