@@ -112,7 +112,7 @@ export default function Starfield({ className }: StarfieldProps) {
             position: "absolute",
             borderRadius: "50%",
             backgroundColor: "white",
-            transition: "all 0.2s ease-out", // Transition fluide pour les déplacements
+            // transition: "all 0.2s ease-out", // Transition fluide pour les déplacements
           }}
         />
       ))}
