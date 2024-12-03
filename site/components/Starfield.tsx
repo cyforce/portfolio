@@ -7,8 +7,8 @@ interface StarfieldProps {
 }
 
 const STAR_COUNT = 150;
-const EXCLUSION_RADIUS = 100; // Rayon d'exclusion autour de la souris
-const MAX_OFFSET_DIST = 100; // Décalage maximum des étoiles
+const EXCLUSION_RADIUS = 60; // Rayon d'exclusion autour de la souris
+const MAX_OFFSET_DIST = 60; // Décalage maximum des étoiles
 
 // Génère les positions initiales des étoiles
 const generateStarData = (count: number) => {
