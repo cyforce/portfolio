@@ -1,0 +1,28 @@
+import { useRouter } from 'next/navigation';
+
+interface CompCardProps {
+  comp: {
+    id: number;
+    title: string;
+    category: string;
+    imageUrl: string;
+    description: string;
+  };
+}
+
+export default function ProjectCard({ comp }: CompCardProps) {
+  const router = useRouter();
+
+  const handleClick = () => {
+    router.push(`/competences/${comp.id}`);
+  };
+
+  return (
+    <div onClick={handleClick} className="cursor-pointer border border-gray-700 rounded-lg overflow-hidden hover:shadow-lg">
+      <img src={comp.imageUrl} alt={comp.title} className="w-full h-48 object-cover" />
+      <div className="p-4">
+        {comp.title && <h3 className="text-xl font-semibold">{comp.title}</h3>}
+      </div>
+    </div>
+  );
+}

@@ -2,6 +2,7 @@
 
 import { useRouter, useParams } from 'next/navigation';
 import Carousel from '@/components/Carousel';
+import P404 from '@/components/p404';
 import { useState, useEffect } from 'react';
 
 interface ProjectDetail {
@@ -34,6 +35,7 @@ export default function ProjectDetailPage() {
             case 404:
               console.error('Projet introuvable');
               setError('Projet introuvable');
+              // router.push('/404'); // Redirection vers la page 404
               break;
             case 400:
               console.error('Requête incorrecte');
@@ -47,35 +49,40 @@ export default function ProjectDetailPage() {
               console.error(`Erreur HTTP : ${response.status}`);
               setError(`Erreur HTTP : ${response.status}`);
           }
-          setProject(null);
           setLoading(false);
           return;
         }
-        const data = await response.json();
+        const data: ProjectDetail = await response.json();
         setProject(data);
       } catch (error) {
-        console.error('Erreur lors de la récupération des données:', error);
-        setError('Erreur lors de la récupération des données');
+        console.error('Erreur lors de la récupération du projet', error);
+        setError('Erreur lors de la récupération du projet');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchProject();
-  }, [params?.id]);
+  }, [params?.id, router]);
 
-  if (loading) return <div>Chargement...</div>;
-  if (error) return <div>{error}</div>;
-  if (!project) return <div>Projet introuvable</div>;
+  if (loading) {
+    return <div>Chargement...</div>;
+  }
+
+  if (error) {
+    // return <div>Erreur : {error}</div>;
+    return <P404 redirectTo="/projets" text="Le projet est introuvable"/>;
+  }
 
   return (
-    <div className="p-6">
-      <h2 className="text-4xl font-bold text-center text-cyan-400 mb-4">Mes Projets</h2>
-      <button onClick={() => router.back()} className="border border-gray-700 p-2 rounded mt-2 md:mt-0 md:ml-4 bg-gray-900 text-white">
-        ← Retour aux projets
-      </button>
-      <h1 className="text-2xl font-bold mt-4 mb-4">{project.title}</h1>
-      <p className="mb-4">{project.description}</p>
-      <Carousel images={project.images} />
+    <div>
+      {project && (
+        <>
+          <h1>{project.title}</h1>
+          <p>{project.description}</p>
+          <Carousel images={project.images} />
+        </>
+      )}
     </div>
   );
 }
