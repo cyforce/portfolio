@@ -9,12 +9,33 @@ datasource db {
   url      = "file:./dev.db" // Spécifie le chemin du fichier de base de données
 }
 
-// Exemple de modèle de projet
 model Project {
-  id          Int     @id @default(autoincrement())
-  title       String
-  description String
-  category    String
-  imageUrl    String
-  createdAt   DateTime @default(now())
+  id           Int          @id @default(autoincrement())
+  title        String
+  description  String
+  category     String
+  imagePrinc   Image?       @relation("MainImage", fields: [imagePrincId], references: [id])
+  imagePrincId Int?
+  createdAt    DateTime     @default(now())
+  competences  Competence[] @relation()
+  templateId   Int          @default(1)
+  images       Image[]      @relation("ProjectImages") // Nom explicite pour cette relation
+}
+
+model Image {
+  id          Int          @id @default(autoincrement())
+  url         String
+  projects    Project[]    @relation("ProjectImages") // Nom explicite pour cette relation
+  mainFor     Project[]    @relation("MainImage") // Nom explicite pour l'autre relation
+  competences Competence[] @relation("CompetenceImage") // Lien vers Competence
+}
+
+model Competence {
+  id           Int       @id @default(autoincrement())
+  name         String
+  imagePrinc   Image?    @relation("CompetenceImage", fields: [imagePrincId], references: [id])
+  imagePrincId Int?
+  level        Int
+  description  String    @default("")
+  projects     Project[] @relation()
 }

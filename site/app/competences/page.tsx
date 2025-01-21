@@ -5,20 +5,92 @@ import { useEffect, useState } from 'react';
 import CompetenceCard from '@/components/CompCard';
 
 export default function CompetencesPage() {
-    return (
-        <div>
-            <h2 className="text-4xl font-bold text-center text-cyan-400">Compétences</h2>
-            <div className="flex flex-col md:flex-row justify-between items-center mb-4 p-4 rounded-lg">
+  interface Competence {
+    id: number;
+    name: string;
+    imageUrl: string;
+    level: number;
+  }
 
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <CompetenceCard comp={{ id: 1, title: 'React', category: 'Frontend', imageUrl: '/images/react.png', description: 'React is a JavaScript library for building user interfaces.' }} />
-                <CompetenceCard comp={{ id: 2, title: 'Node.js', category: 'Backend', imageUrl: '/images/nodejs.png', description: 'Node.js is a JavaScript runtime built on Chrome\'s V8 JavaScript engine.' }} />
-                <CompetenceCard comp={{ id: 3, title: 'Tailwind CSS', category: 'Frontend', imageUrl: '/images/tailwindcss.png', description: 'A utility-first CSS framework for quickly building custom designs.' }} />
-                <CompetenceCard comp={{ id: 4, title: 'Express', category: 'Backend', imageUrl: '/images/express.png', description: 'Fast, unopinionated, minimalist web framework for Node.js.' }} />
-                <CompetenceCard comp={{ id: 5, title: 'Next.js', category: 'Frontend', imageUrl: '/images/nextjs.png', description: 'The React Framework for Production.' }} />
-                <CompetenceCard comp={{ id: 6, title: 'MongoDB', category: 'Database', imageUrl: '/images/mongodb.png', description: 'The most popular database for modern apps.' }} />
-            </div>
-        </div>
-    );
+  const [competences, setCompetences] = useState<Competence[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filteredCompetences, setFilteredCompetences] = useState<Competence[]>([]);
+  const [levelFilter, setlevelFilter] = useState('');
+  const [nameFilter, setNameFilter] = useState('');
+
+  useEffect(() => {
+    const fetchCompetences = async () => {
+      const response = await fetch('/api/competences');
+      const data = await response.json();
+      setCompetences(data);
+      setFilteredCompetences(data);
+      setLoading(false);
+    };
+
+    fetchCompetences();
+  }, []);
+
+  useEffect(() => {
+    const filterCompetences = () => {
+      let filtered = competences;
+
+      if (levelFilter) {
+        filtered = filtered.filter((competence) => competence.level === Number(levelFilter));
+      }
+
+      if (nameFilter) {
+        filtered = filtered.filter((competence) => competence.name.toLowerCase().includes(nameFilter.toLowerCase()));
+      }
+
+      setFilteredCompetences(filtered);
+    };
+
+    filterCompetences();
+  }, [competences, levelFilter, nameFilter]);
+
+  const handlelevelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setlevelFilter(e.target.value);
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNameFilter(e.target.value);
+  };
+
+  if (loading) {
+    return <div className="text-center text-xl">Chargement...</div>;
+  }
+
+  const categories = [...new Set(competences.map((competence) => competence.level))];
+
+  return (
+    <div className="space-y-8">
+      <h2 className="text-4xl font-bold text-center text-cyan-400">Mes Competences</h2>
+      <div className="flex justify-between items-center">
+        <input
+          type="text"
+          placeholder="Rechercher par nom"
+          value={nameFilter}
+          onChange={handleNameChange}
+          className="border border-gray-700 p-2 rounded bg-gray-900 text-white"
+        />
+        <select
+          value={levelFilter} 
+          onChange={handlelevelChange}
+          className="border border-gray-700 p-2 rounded mt-2 md:mt-0 md:ml-4 bg-gray-900 text-white"
+        >
+          <option value="">Toutes les catégories</option>
+          {categories.map((level) => (
+            <option key={level} value={level}>
+              {level}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {filteredCompetences.map((competence) => (
+          <CompetenceCard key={competence.id} comp={competence} />
+        ))}
+      </div>
+    </div>
+  );
 }

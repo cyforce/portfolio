@@ -18,6 +18,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const project = await prisma.project.findUnique({
       where: { id: projectId },
+      include: {
+        imagePrinc: true, // Inclure l'image principale
+        competences: {
+          include: {
+            imagePrinc: true, // Inclure l'image principale des compétences
+          },
+        },
+      },
     });
 
     if (!project) {
@@ -29,5 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (error) {
     console.error('Erreur serveur:', error);
     res.status(500).json({ error: 'Erreur serveur' });
+  } finally {
+    await prisma.$disconnect(); // Fermer proprement le client Prisma
   }
 }

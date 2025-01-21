@@ -1,1 +1,3 @@
-{}
+{
+  "/competences/[id]/page": "app/competences/[id]/page.js"
+}

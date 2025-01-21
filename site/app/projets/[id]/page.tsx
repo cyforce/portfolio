@@ -1,15 +1,24 @@
+// /projets/[id]/page.tsx
+
 "use client";
 
 import { useRouter, useParams } from 'next/navigation';
-import Carousel from '@/components/Carousel';
 import P404 from '@/components/p404';
+import Template1 from '@/components/Projects/Template1';
+import Template2 from '@/components/Projects/Template2';
 import { useState, useEffect } from 'react';
 
 interface ProjectDetail {
   id: number;
   title: string;
   description: string;
-  images: string[];
+  images: Image[];
+  templateId: number;
+}
+
+interface Image {
+  id: number;
+  url: string;
 }
 
 export default function ProjectDetailPage() {
@@ -35,7 +44,6 @@ export default function ProjectDetailPage() {
             case 404:
               console.error('Projet introuvable');
               setError('Projet introuvable');
-              // router.push('/404'); // Redirection vers la page 404
               break;
             case 400:
               console.error('Requête incorrecte');
@@ -66,23 +74,28 @@ export default function ProjectDetailPage() {
   }, [params?.id, router]);
 
   if (loading) {
-    return <div>Chargement...</div>;
+    return <div className="text-center text-xl">Chargement...</div>;
   }
 
   if (error) {
-    // return <div>Erreur : {error}</div>;
-    return <P404 redirectTo="/projets" text="Le projet est introuvable"/>;
+    return <P404 redirectTo="/projets" />;
   }
 
+  const renderTemplate = () => {
+    if (!project) return null;
+    switch (project.templateId) {
+      case 1:
+        return <Template1 project={project} />;
+      case 2:
+        return <Template2 project={project} />;
+      default:
+        return <Template1 project={project} />;
+    }
+  };
+
   return (
-    <div>
-      {project && (
-        <>
-          <h1>{project.title}</h1>
-          <p>{project.description}</p>
-          <Carousel images={project.images} />
-        </>
-      )}
+    <div className="max-w-4xl mx-auto p-4">
+      {project && renderTemplate()}
     </div>
   );
 }
