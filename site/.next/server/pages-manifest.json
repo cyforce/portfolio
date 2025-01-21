@@ -2,5 +2,5 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/api/competences/[id]": "pages/api/competences/[id].js"
+  "/api/projects/[id]": "pages/api/projects/[id].js"
 }

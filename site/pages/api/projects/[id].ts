@@ -20,6 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       where: { id: projectId },
       include: {
         imagePrinc: true, // Inclure l'image principale
+        images: true, // Inclure toutes les images associées au projet
         competences: {
           include: {
             imagePrinc: true, // Inclure l'image principale des compétences
