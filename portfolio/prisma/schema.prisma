@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Project {
+  id           Int          @id @default(autoincrement())
+  title        String
+  description  String
+  category     String
+  imagePrinc   Image?       @relation("MainImage", fields: [imagePrincId], references: [id])
+  imagePrincId Int?
+  createdAt    DateTime     @default(now())
+  competences  Competence[] @relation()
+  templateId   Int          @default(1)
+  images       Image[]      @relation("ProjectImages")
+  pages        Page[]       @relation("ProjectPages") // Relier les projets aux pages dynamiques
+}
+
+model Image {
+  id          Int          @id @default(autoincrement())
+  url         String
+  projects    Project[]    @relation("ProjectImages")
+  mainFor     Project[]    @relation("MainImage")
+  competences Competence[] @relation("CompetenceImage")
+}
+
+model Competence {
+  id           Int       @id @default(autoincrement())
+  name         String
+  imagePrinc   Image?    @relation("CompetenceImage", fields: [imagePrincId], references: [id])
+  imagePrincId Int?
+  level        Int
+  description  String    @default("")
+  projects     Project[] @relation()
+}
+
+model Page {
+  id         Int         @id @default(autoincrement())
+  title      String // Titre de la page
+  slug       String      @unique // URL unique pour accéder à la page
+  project    Project?    @relation("ProjectPages", fields: [projectId], references: [id]) // Optionnel : Lien avec un projet
+  projectId  Int?
+  components Component[] @relation("PageComponents")
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model Component {
+  id     Int    @id @default(autoincrement())
+  type   String // Type de composant, e.g., "Title", "ImageText", "Stats"
+  data   String // Données spécifiques au composant, stockées sous forme de chaîne JSON
+  order  Int // Ordre d'affichage sur la page
+  page   Page   @relation("PageComponents", fields: [pageId], references: [id])
+  pageId Int
+}
