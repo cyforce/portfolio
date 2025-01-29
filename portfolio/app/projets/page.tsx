@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import ProjectCard from '@/components/ProjectCard';
+import ProjectCard from '@/components/Projects/ProjectCard';
 
 export default function ProjectsPage() {
   interface Project {

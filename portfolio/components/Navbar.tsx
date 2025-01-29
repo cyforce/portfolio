@@ -1,17 +1,19 @@
+"use client";
+
 // components/Navbar.tsx
-import Link from 'next/link';
-import React, { useState } from 'react';
+import React from 'react';
+import { usePathname } from 'next/navigation';
 
 interface NavbarProps {
   className?: string;
 }
 
 export default function Navbar({ className }: NavbarProps) {
-  const [active, setActive] = useState<string>('/');
+  const pathname = usePathname();
 
   const menuItems = [
     { label: 'Accueil', href: '/' },
-    { label: 'À propos', href: '/a-propos' },
+    { label: 'À propos', href: '/aPropos' },
     { label: 'Compétences', href: '/competences' },
     { label: 'Langues', href: '/langues' },
     { label: 'Formations', href: '/formations' },
@@ -29,14 +31,19 @@ export default function Navbar({ className }: NavbarProps) {
               <a
                   key={item.href}
                   href={item.href}
-                  onClick={() => setActive(item.href)}
-                  className={`${
-                      active === item.href
-                          ? 'font-bold underline text-white'
-                          : 'text-gray-300'
-                  } hover:font-bold hover:underline`}
+                  className={`relative text-gray-300 ${
+                      pathname === item.href ? 'text-white' : ''
+                  }`}
               >
-                {item.label}
+            <span
+                className={`transition-all duration-300 ${
+                    pathname === item.href
+                        ? 'font-bold underline'
+                        : 'hover:font-bold hover:underline'
+                }`}
+            >
+              {item.label}
+            </span>
               </a>
           ))}
         </div>
