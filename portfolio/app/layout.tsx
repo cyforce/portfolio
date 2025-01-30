@@ -1,8 +1,9 @@
 "use client"
 
 import './globals.css';
-import Navbar from '../components/Navbar';
-import Starfield from '../components/Starfield'; // Import du composant étoilé
+import Navbar from '@/components/Navbar';
+import Starfield from '@/components/Starfield'; // Import du composant étoilé
+import Footer from "@/components/Footer";
 import { ReactNode } from 'react';
 import { SessionProvider } from "next-auth/react";
 
@@ -24,6 +25,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
           <main className="flex-grow p-6 mt-8 z-10">
             {children}
           </main>
+
+        <Footer></Footer>
         </body>
     </SessionProvider>
     </html>
