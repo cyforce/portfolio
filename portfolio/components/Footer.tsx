@@ -26,7 +26,7 @@ export default function Footer({ className }: FooterProps) {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className={`fixed bottom-0 left-0 w-full bg-black bg-opacity-75 p-4 flex justify-center z-50 ${className}`}>
+        <div className={`w-full bg-black bg-opacity-75 p-4 flex justify-center ${className}`}>
             <div className="flex flex-col items-center space-y-4">
                 <div className="flex space-x-4">
                     {menuItems.map((item) => (
@@ -50,13 +50,13 @@ export default function Footer({ className }: FooterProps) {
                     ))}
                 </div>
                 <div className="text-gray-300">
-                    <p>Contact: contact@example.com</p>
-                    <p>Téléphone: +33 1 23 45 67 89</p>
+                    <p>Contact: <a href={"mailto:celian.touzeau@outlook.fr"}>celian.touzeau@outlook.fr</a></p>
+                    <p>Téléphone: +33 6 34 99 11 45</p>
                 </div>
                 <div className="text-gray-300">
-                    <p>&copy; {currentYear} Nom de l'entreprise. Tous droits réservés.</p>
+                    <p>&copy; {currentYear} Célian TOUZEAU. Tous droits réservés.</p>
                 </div>
             </div>
-        </footer>
+        </div>
     );
 }

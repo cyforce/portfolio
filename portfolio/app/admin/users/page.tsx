@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import AddUserForm from "@/components/users/addUserForm";
 import RmUserForm from "@/components/users/rmUserForm";
 import UpdateUserForm from "@/components/users/updateUserForm";
+import { useRouter } from "next/navigation";
 
 interface User {
     idUser: number;
@@ -16,6 +17,7 @@ export default function UsersPage() {
     const [search, setSearch] = useState("");
     const [selectedForm, setSelectedForm] = useState<"add" | "remove" | "modify" | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
 
     const fetchUsers = async () => {
         try {
@@ -41,7 +43,8 @@ export default function UsersPage() {
     }, []);
 
     return (
-        <div className="p-10 bg-gray-900 bg-opacity-75 text-white min-h-screen">
+        <div className="p-10 text-white min-h-screen">
+            <button onClick={() => router.push("/admin")} className={"z-20 absolute top-16 left-2 bg-amber-500 px-4 py-2 text-white rounded hover:bg-amber-400"}>Retour</button>
             <h1 className="text-3xl font-bold text-center mb-6">Gestion des utilisateurs</h1>
 
             {/* Barre de recherche */}

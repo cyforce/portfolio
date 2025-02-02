@@ -25,7 +25,7 @@ export default NextAuth({
                         database: process.env.DB_NAME,
                     });
 
-                    console.log("Connexion à la base de données établie");
+                    // console.log("Connexion à la base de données établie");
 
                     // Vérifie si l'utilisateur existe
                     const [rows] = await db.execute(
@@ -33,7 +33,7 @@ export default NextAuth({
                         [credentials.username]
                     );
 
-                    console.log("Résultat de la requête de base de données:", rows);
+                    // console.log("Résultat de la requête de base de données:", rows);
 
                     await db.end(); // Ferme la connexion
 
@@ -62,7 +62,7 @@ export default NextAuth({
     ],
     callbacks: {
         async session({ session, token }) {
-            console.log("Session callback - Token:", token);
+            // console.log("Session callback - Token:", token);
             if (session.user) {
                 session.user.id = token.id as string;
                 session.user.role = token.role as string;
@@ -70,7 +70,7 @@ export default NextAuth({
             return session;
         },
         async jwt({ token, user }) {
-            console.log("JWT callback - User:", user);
+            // console.log("JWT callback - User:", user);
             if (user) {
                 token.id = user.id;
                 token.role = user.role;
