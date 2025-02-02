@@ -5,11 +5,12 @@ import { useState } from "react";
 // AddImageForm.tsx
 interface AddImageFormProps {
     onImageAdded: () => Promise<void>;
-    onCloseForm: () => void; // Nouveau prop pour fermer le formulaire
+    onCloseForm: () => void;
 }
 
 export default function AddImageForm(props: AddImageFormProps) {
     const [file, setFile] = useState<File | null>(null);
+    const [alt, setAlt] = useState<string>(""); // Nouvel état pour alt
     const [message, setMessage] = useState<string | null>(null);
     const [messageType, setMessageType] = useState<"success" | "error" | null>(null);
 
@@ -23,17 +24,19 @@ export default function AddImageForm(props: AddImageFormProps) {
 
         const formData = new FormData();
         formData.append("image", file);
+        formData.append("alt", alt); // Ajout de l'alt dans la requête
 
         try {
             const res = await fetch("/api/images/addImage", {
                 method: "POST",
                 body: formData,
             });
+
             if (res.ok) {
                 setMessage("Image ajoutée avec succès.");
                 setMessageType("success");
                 await props.onImageAdded();
-                props.onCloseForm(); // Ferme le formulaire après l'ajout
+                props.onCloseForm();
             } else {
                 setMessage("Erreur lors de l'ajout de l'image.");
                 setMessageType("error");
@@ -52,6 +55,13 @@ export default function AddImageForm(props: AddImageFormProps) {
                 accept="image/*"
                 onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
                 className="border p-2 mb-2 w-full text-white"
+            />
+            <input
+                type="text"
+                placeholder="Texte alternatif (alt)"
+                value={alt}
+                onChange={(e) => setAlt(e.target.value)}
+                className="border p-2 mb-2 w-full text-white bg-transparent"
             />
             <button type="submit" className="bg-green-500 px-4 py-2 text-white rounded w-full">
                 Ajouter

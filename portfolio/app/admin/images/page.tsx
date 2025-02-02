@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 interface Image {
     idImage: number;
     url: string;
+    alt: string;
 }
 
 export default function ImagesPage() {
@@ -83,7 +84,7 @@ export default function ImagesPage() {
             {error && <p className="text-red-500">{error}</p>}
 
             {/* Liste des images en flex grid */}
-            <div className="border border-gray-700 p-4 rounded bg-gray-800 bg-opacity-50 max-h-[500px] overflow-y-auto">
+            <div className="max-h-[500px] overflow-y-auto">
                 <div className="flex flex-wrap gap-4 justify-center">
                     {Array.isArray(images) &&
                         images
@@ -91,12 +92,12 @@ export default function ImagesPage() {
                             .map((image) => (
                                 <div
                                     key={image.idImage}
-                                    className="border border-gray-700 p-2 rounded shadow-md bg-gray-900 text-center"
+                                    className="bg-gray-800 rounded p-2 flex flex-col items-center"
                                 >
                                     <span className="block mb-2">ID: {image.idImage}</span>
                                     <img
                                         src={`/images/${image.url}`}
-                                        alt={image.url}
+                                        alt={image.alt}
                                         className="w-32 h-32 object-cover rounded mb-2"
                                     />
                                     <button

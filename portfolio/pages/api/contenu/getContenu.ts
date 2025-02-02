@@ -11,9 +11,11 @@ async function connect() {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== 'GET') {
-        return res.status(405).json({ error: 'Méthode non autorisée. Utilisez GET.' });
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Méthode non autorisée. Utilisez POST.' });
     }
+
+    // console.log("Received request body:", req.body);
 
     const params = req.body;
 
@@ -21,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const connection = await connect();
 
         switch (params.action) {
-            case '0': // Récupérer un contenu par ID
+            case 0: // Récupérer un contenu par ID
                 if (!params.id) {
                     await connection.end();
                     return res.status(400).json({ error: "L'ID du contenu est requis." });
@@ -35,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 await connection.end();
                 return res.status(200).json(content);
 
-            case '1': // Rechercher du contenu avec des critères (titre et/ou type)
+            case 1: // Rechercher du contenu avec des critères (titre et/ou type)
                 let SQL = "SELECT idContenu, titre, description, type, imagePrincContenu FROM Contenu WHERE ";
                 let whereClauses = [];
                 let values: any[] = [];
@@ -54,6 +56,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 } else {
                     SQL += whereClauses.join(" AND ");
                 }
+
+                // console.log("Executing SQL query:", SQL, values);
 
                 const [results] = await connection.execute(SQL, values);
                 await connection.end();

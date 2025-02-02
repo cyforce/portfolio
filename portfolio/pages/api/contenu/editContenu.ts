@@ -11,9 +11,11 @@ async function connect() {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== 'GET') {
-        return res.status(405).json({ error: 'Méthode non autorisée. Utilisez GET.' });
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Méthode non autorisée. Utilisez POST.' });
     }
+
+    console.log(req.body);
 
     const params = req.body;
 
@@ -25,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const connection = await connect();
 
         switch (params.action) {
-            case '0': // Créer une page
+            case 0: // Créer une page
                 if (!params.titre || !params.description || !params.type || !params.imagePrincContenu || !params.page) {
                     return res.status(400).json({ error: 'Tous les champs sont requis pour la création.' });
                 }
@@ -38,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 await connection.end();
                 return res.status(201).json({ message: "Page créée avec succès.", result: createResult });
 
-            case '1': // Modifier une page
+            case 1: // Modifier une page
                 if (!params.idContenu) {
                     return res.status(400).json({ error: "L'ID du contenu est requis pour la modification." });
                 }
@@ -75,11 +77,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 SQL = SQL.slice(0, -2) + " WHERE idContenu = ?";
                 edits.push(params.idContenu);
 
+                console.log(SQL, edits);
+
                 const updateResult = await connection.execute(SQL, edits);
                 await connection.end();
-                return res.status(200).json({ message: "Page mise à jour avec succès.", result: updateResult });
 
-            case '2': // Supprimer une page
+                console.log(updateResult);
+                return res.status(200).json({ success: true, message: "Page mise à jour avec succès.", result: updateResult });
+
+            case 2: // Supprimer une page
                 if (!params.idContenu) {
                     return res.status(400).json({ error: "L'ID du contenu est requis pour la suppression." });
                 }

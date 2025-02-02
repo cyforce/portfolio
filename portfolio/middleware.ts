@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 
 export async function middleware(req: NextRequest) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-    console.log("Token:", token); // Ajoutez ce log pour le débogage
+    // console.log("Token:", token); // Ajoutez ce log pour le débogage
 
     // Vérifie si l'utilisateur est connecté
     if (!token && req.nextUrl.pathname.startsWith("/admin") && !req.nextUrl.pathname.startsWith("/admin/login")) {

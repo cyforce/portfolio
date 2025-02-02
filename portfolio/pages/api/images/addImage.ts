@@ -7,18 +7,18 @@ import mysql from 'mysql2/promise';
 
 export const config = {
     api: {
-        bodyParser: false, // Désactive le bodyParser pour gérer les fichiers correctement
+        bodyParser: false,
     },
 };
 
 // Fonction pour parser la requête avec formidable
-const parseForm = async (req: NextApiRequest): Promise<{ files: formidable.Files }> => {
-    const form = formidable(); // ✅ Nouvelle syntaxe
+const parseForm = async (req: NextApiRequest): Promise<{ files: formidable.Files; fields: formidable.Fields }> => {
+    const form = formidable({ multiples: false });
 
     return new Promise((resolve, reject) => {
         form.parse(req, (err, fields, files) => {
             if (err) reject(err);
-            else resolve({ files });
+            else resolve({ fields, files });
         });
     });
 };
@@ -29,8 +29,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-        const { files } = await parseForm(req);
+        const { fields, files } = await parseForm(req);
         const file = files.image as File | File[] | undefined;
+        const altText = fields.alt ? String(fields.alt) : ''; // Récupération de l'alt
 
         if (!file || (Array.isArray(file) && file.length === 0)) {
             return res.status(400).json({ error: 'Aucun fichier reçu' });
@@ -58,8 +59,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             database: process.env.DB_NAME,
         });
 
-        // Insertion de l'image en base de données
-        await connection.execute("INSERT INTO Image (url) VALUES (?)", [newFileName]);
+        // Insertion de l'image et du texte alternatif en base de données
+        await connection.execute("INSERT INTO Image (url, alt) VALUES (?, ?)", [newFileName, altText]);
         await connection.end();
 
         res.status(200).json({ message: 'Image ajoutée avec succès', fileName: newFileName });
