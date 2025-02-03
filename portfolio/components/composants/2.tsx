@@ -1,20 +1,17 @@
 interface Composant {
-    textes: string;
-    images: string;
+    texts: string[];
+    imgs: number[];
 }
 
-export default function Composant({ textes, images }: Composant) {
-    let imagesJSON = JSON.parse(images);
-    let textesJSON = JSON.parse(textes);
-
+export default function Composant1({ texts, imgs }: Composant) {
     return (
         <div className={"w-screen h-screen"}>
-            <img src={`/images/${imagesJSON[0].url}`} alt={imagesJSON[0].url} className={"z-0 w-screen h-screen"}/>
+            <img src={`/images/${imgs[0]}`} alt={imgs[0].toString()} className={"z-0 w-screen h-screen"}/>
 
-            <div className={"z-10 absolute top-0 left-0 w-screen h-screen bg-black bg-opacity-50"}>
+            <div className={"z-10 w-screen h-screen"}>
                 <div className={"text-white p-10"}>
-                    <h1>{textesJSON[0]}</h1>
-                    <p>{textesJSON[1]}</p>
+                    <h1>{texts[0]}</h1>
+                    <p>{texts[1]}</p>
                 </div>
             </div>
         </div>
