@@ -3,7 +3,7 @@
 "use client";
 
 import { useRouter, useParams } from 'next/navigation';
-import P404 from '@/components/p404';
+import P404 from '@/components/front/p404';
 import Template1 from '@/components/Projects/Template1';
 import Template2 from '@/components/Projects/Template2';
 import { useState, useEffect } from 'react';

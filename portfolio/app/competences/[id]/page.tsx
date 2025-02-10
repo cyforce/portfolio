@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useParams } from 'next/navigation';
-import P404 from '@/components/p404';
+import P404 from '@/components/front/p404';
 import { useState, useEffect } from 'react';
 
 interface Project {

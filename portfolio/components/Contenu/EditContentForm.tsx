@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import CustomSelect from "@/components/CustomSelect";
-import CustomImageSelect from "@/components/CustomImageSelect";
+import CustomSelect from "@/components/front/CustomSelect";
+import CustomImageSelect from "@/components/Contenu/CustomImageSelect";
 
 interface Image {
     idImage: number;
@@ -34,9 +34,13 @@ const EditContentForm = ({ images, contentToEdit, onCancel, onSuccess }: EditCon
     useEffect(() => {
         setTitle(contentToEdit.titre);
         setDescription(contentToEdit.description);
-        setSelectedType(contentToEdit.type);  // Initialisation correcte de selectedType
+        setSelectedType(String(contentToEdit.type));  // Assure-toi que type est une chaîne
         setSelectedImage(contentToEdit.imagePrincContenu);
     }, [contentToEdit]);
+
+    const consoleContentToEdit = () => {
+        console.log(contentToEdit);
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -49,6 +53,7 @@ const EditContentForm = ({ images, contentToEdit, onCancel, onSuccess }: EditCon
             return;
         }
 
+        // TODO: Ajouter les nouveaux champs spécifiques à chaque type de contenu dans la requete
         const newContent = {
             idContenu: contentToEdit.idContenu,
             titre: title,
@@ -86,11 +91,12 @@ const EditContentForm = ({ images, contentToEdit, onCancel, onSuccess }: EditCon
         { value: "", label: "Sélectionner le type" },
         { value: "0", label: "Projet" },
         { value: "1", label: "Compétence" },
+        { value: "2", label: "Page classique" },
     ];
 
     return (
-        <div className="w-screen min-h-screen absolute top-0 left-0 z-20 flex justify-center items-center bg-gray-800/50">
-            <div className="border border-gray-700 bg-gray-800 p-8 rounded-lg w-full max-w-lg z-30">
+        <div className="w-screen h-[calc(100vh-3.45rem)] mt-[3.45rem] fixed top-0 left-0 z-20 flex justify-center items-center bg-gray-800/50">
+            <div className="border border-gray-700 bg-gray-800 p-8 rounded-lg w-full max-w-lg z-30 max-h-[calc(100vh-3.45rem)] overflow-y-auto">
                 <h2 className="text-2xl font-bold mb-4">Modifier le contenu</h2>
                 <form onSubmit={handleSubmit} className="bg-gray-800 p-6 rounded max-w-lg mx-auto text-white">
                     {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
@@ -115,6 +121,7 @@ const EditContentForm = ({ images, contentToEdit, onCancel, onSuccess }: EditCon
                     </label>
 
                     <CustomSelect
+                        key={selectedType} // Force React à recréer le composant si la valeur change
                         selectedValue={selectedType}
                         setSelectedValue={setSelectedType}
                         options={types}
@@ -127,6 +134,7 @@ const EditContentForm = ({ images, contentToEdit, onCancel, onSuccess }: EditCon
                         setSelectedImage={(imageId) => setSelectedImage(imageId)}
                         placeholder={"Sélectionner l'image principale"}
                     />
+                    {/* TODO: Ajouter les champs spécifiques à chaque type de contenu */}
 
                     <div className="flex justify-between mt-4">
                         <button
@@ -143,6 +151,13 @@ const EditContentForm = ({ images, contentToEdit, onCancel, onSuccess }: EditCon
                         >
                             {isSubmitting ? "En cours..." : "Modifier"}
                         </button>
+                        {/* <button
+                            type="button"
+                            onClick={consoleContentToEdit}
+                            className="bg-blue-500 px-4 py-2 rounded disabled:bg-blue-300"
+                        >
+                            log
+                        </button> */}
                     </div>
                 </form>
             </div>

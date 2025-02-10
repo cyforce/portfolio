@@ -24,7 +24,7 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="flex items-center justify-center h-screen bg-gray-900 text-white">
+        <div className="flex items-center justify-center h-screen  text-white">
             <form onSubmit={handleSubmit} className="bg-gray-800 p-6 rounded shadow-lg">
                 <h2 className="text-2xl mb-4">Connexion Admin</h2>
                 {error && <p className="text-red-500">{error}</p>}

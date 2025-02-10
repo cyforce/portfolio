@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AddImageForm from "@/components/addImageForm";
+import AddImageForm from "@/components/Contenu/addImageForm";
 import { useRouter } from "next/navigation";
 
 interface Image {

@@ -1,6 +1,6 @@
 import {useState} from "react";
-import CustomSelect from "@/components/CustomSelect";
-import CustomImageSelect from "@/components/CustomImageSelect";
+import CustomSelect from "@/components/front/CustomSelect";
+import CustomImageSelect from "@/components/Contenu/CustomImageSelect";
 
 interface Image {
     idImage: number;
@@ -32,14 +32,14 @@ const AddContentForm = ({ images, onCancel, onSuccess }: AddContentFormProps) =>
             setIsSubmitting(false);
             return;
         }
-
+        // TODO: Ajouter les nouveaux champs spécifiques à chaque type de contenu dans la requete
         const newContent = {
             titre: title,
             description,
             type: selectedType,
             imagePrincContenu: selectedImage,
             page: JSON.stringify([]),
-            action: "0",
+            action: 0,
         };
 
         try {
@@ -58,6 +58,7 @@ const AddContentForm = ({ images, onCancel, onSuccess }: AddContentFormProps) =>
 
             // Si tout se passe bien, appel du callback pour rafraîchir les contenus
             onSuccess();
+            onCancel();
         } catch (error) {
             console.error("Erreur lors de l'ajout du contenu:", error);
             setErrorMessage("Une erreur est survenue lors de l'ajout du contenu. Veuillez réessayer.");
@@ -70,11 +71,12 @@ const AddContentForm = ({ images, onCancel, onSuccess }: AddContentFormProps) =>
         { value: "", label: "Sélectionner le type" },
         { value: "0", label: "Projet" },
         { value: "1", label: "Compétence" },
+        { value: "2", label: "Page classique" },
     ];
 
     return (
-        <div className="w-screen min-h-screen absolute top-0 left-0 z-20 flex justify-center items-center bg-gray-800/50">
-            <div className="border border-gray-700 bg-gray-800 p-8 rounded-lg w-full max-w-lg z-30">
+        <div className="w-screen h-[calc(100vh-3.45rem)] mt-[3.45rem] fixed top-0 left-0 z-20 flex justify-center items-center bg-gray-800/50">
+            <div className="border border-gray-700 bg-gray-800 p-8 rounded-lg w-full max-w-lg z-30 max-h-[calc(100vh-3.45rem)] overflow-y-auto">
                 <h2 className="text-2xl font-bold text-center mb-4 text-white">Ajouter un nouveau contenu</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Champs du formulaire */}
@@ -124,6 +126,8 @@ const AddContentForm = ({ images, onCancel, onSuccess }: AddContentFormProps) =>
                         />
                     </div>
 
+                    // TODO: Ajouter les champs spécifiques à chaque type de contenu
+
                     {errorMessage && (
                         <div className="text-red-500 text-center mt-4">
                             {errorMessage}
@@ -132,18 +136,18 @@ const AddContentForm = ({ images, onCancel, onSuccess }: AddContentFormProps) =>
 
                     <div className="flex justify-between gap-4">
                         <button
-                            type="submit"
-                            className={`bg-green-500 px-4 py-2 rounded hover:bg-green-400 ${isSubmitting ? 'cursor-not-allowed opacity-50' : ''}`}
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? "Ajout en cours..." : "Ajouter"}
-                        </button>
-                        <button
                             type="button"
                             onClick={onCancel}
                             className="bg-red-500 px-4 py-2 rounded hover:bg-red-400"
                         >
                             Annuler
+                        </button>
+                        <button
+                            type="submit"
+                            className={`bg-green-500 px-4 py-2 rounded hover:bg-green-400 ${isSubmitting ? 'cursor-not-allowed opacity-50' : ''}`}
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? "Ajout en cours..." : "Ajouter"}
                         </button>
                     </div>
                 </form>

@@ -13,7 +13,7 @@ export default function Navbar({ className }: NavbarProps) {
 
   const menuItems = [
     { label: 'Accueil', href: '/' },
-    { label: 'À propos', href: '/aPropos' },
+    { label: 'À propos', href: '/apropos' },
     { label: 'Compétences', href: '/competences' },
     { label: 'Langues', href: '/langues' },
     { label: 'Formations', href: '/formations' },

@@ -10,9 +10,10 @@ interface CustomSelectProps {
     setSelectedValue: (value: string) => void;
     options: Option[];
     placeholder: string;
+    className?: string;
 }
 
-const CustomSelect = ({ selectedValue, setSelectedValue, options, placeholder }: CustomSelectProps) => {
+const CustomSelect = ({ selectedValue, setSelectedValue, options, placeholder, className }: CustomSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const selectRef = useRef<HTMLDivElement | null>(null);
 
@@ -40,15 +41,15 @@ const CustomSelect = ({ selectedValue, setSelectedValue, options, placeholder }:
     };
 
     return (
-        <div ref={selectRef} className="relative w-full">
+        <div ref={selectRef} className={`relative ${className}`}>
             {/* Sélection */}
             <div
                 className="bg-transparent text-white border border-white rounded p-2 cursor-pointer select-none"
                 onClick={toggleDropdown}
             >
-        <span>
-          {selectedValue ? options.find(option => option.value === selectedValue)?.label : placeholder}
-        </span>
+                <span>
+                  {selectedValue ? options.find(option => option.value === selectedValue)?.label : placeholder}
+                </span>
             </div>
 
             {/* Liste déroulante */}

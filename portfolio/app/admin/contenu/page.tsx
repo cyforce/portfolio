@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import AddContentForm from "@/components/AddContentForm";
-import EditContentForm from "@/components/EditContentForm";
+import AddContentForm from "@/components/Contenu/AddContentForm";
+import EditContentForm from "@/components/Contenu/EditContentForm";
+import CustomSelect from "@/components/front/CustomSelect";
+import PageContenuForm from "@/components/Contenu/PageContenuForm";
+import DisclaimerMsgConfirm from "@/components/front/DisclaimerMsgConfirm";
 
 interface Image {
     idImage: number;
@@ -19,6 +22,12 @@ interface Contenu {
     type: string;
 }
 
+interface disclaimerContentType {
+    onConfirm: () => void;
+    onCancel: () => void;
+    msg: string;
+}
+
 export default function AdminContentPage() {
     const [contenus, setContenus] = useState<Contenu[]>([]);
     const [images, setImages] = useState<Image[]>([]);
@@ -27,7 +36,18 @@ export default function AdminContentPage() {
     const [isFormVisible, setIsFormVisible] = useState(false);
     const [isEditFormVisible, setIsEditFormVisible] = useState(false);
     const [contentToEdit, setContentToEdit] = useState<Contenu | null>(null); // ID du contenu à modifier
+    const [isPageContenuFormVisible, setIsPageContenuFormVisible] = useState(false);
+    const [isDeleteDisclaimerVisible, setIsDeleteDisclaimerVisible] = useState(false);
+    const [disclaimerContent, setDisclaimerContent] = useState<disclaimerContentType | null>(null);
+
     const router = useRouter();
+
+    const typeOptions = [
+        {value: "", label: "Tous"},
+        {value: "0", label: "Projet"},
+        {value: "1", label: "Compétence"},
+        {value: "2", label: "Page classique"},
+    ];
 
     // Récupérer les contenus depuis l'API
     const fetchContenus = async () => {
@@ -90,7 +110,7 @@ export default function AdminContentPage() {
     };
 
     const handleDelete = async (idContenu: number) => {
-        const confirmation = confirm("Voulez-vous vraiment supprimer cette image ?");
+        const confirmation = confirm("Voulez-vous vraiment supprimer ce contenu ?");
         if (!confirmation) return;
 
         try {
@@ -105,22 +125,70 @@ export default function AdminContentPage() {
             } else {
                 throw new Error("Failed to delete content");
             }
+
+            setIsDeleteDisclaimerVisible(false);
+            setDisclaimerContent(null);
         } catch (error) {
             console.error("Error deleting content:", error);
         }
     }
 
+    useEffect(() => {
+        if (isPageContenuFormVisible) {
+            document.body.style.overflowY = "hidden";
+        } else {
+            document.body.style.overflowY = "auto";
+        }
+
+        // Nettoyage pour éviter les effets indésirables si le composant est démonté
+        return () => {
+            document.body.style.overflowY = "auto";
+        };
+    }, [isPageContenuFormVisible]);
+
+    useEffect(() => {
+        if (isFormVisible) {
+            document.body.style.overflowY = "hidden";
+        } else {
+            document.body.style.overflowY = "auto";
+        }
+
+        // Nettoyage pour éviter les effets indésirables si le composant est démonté
+        return () => {
+            document.body.style.overflowY = "auto";
+        };
+    }, [isFormVisible]);
+
+    const handleAssignationToggle = () => {
+        setIsPageContenuFormVisible((prev) => !prev);
+    };
+
+    const toggleDeleteDisclaimer = (contenu:Contenu) => {
+        if (isDeleteDisclaimerVisible) {
+            setIsDeleteDisclaimerVisible(false);
+            setDisclaimerContent(null);
+        } else {
+            setIsDeleteDisclaimerVisible(true);
+            const disclaimeContent = {
+                onConfirm: () => handleDelete(contenu.idContenu),
+                onCancel: () => setIsDeleteDisclaimerVisible(false),
+                msg: `Voulez-vous vraiment supprimer ${contenu.titre} ?`,
+            }
+            setDisclaimerContent(disclaimeContent);
+        }
+    }
+
     return (
-        <div className="p-10 text-white min-h-screen relative">
+        <div className="text-white min-h-screen relative">
             <button
                 onClick={() => router.push("/admin")}
                 className="z-20 absolute top-9 left-6 bg-amber-500 px-4 py-2 text-white rounded hover:bg-amber-400"
             >
                 Retour
             </button>
-            <h1 className="text-3xl font-bold text-center mb-6">Gestion du contenu</h1>
+            <h1 className="pt-10 text-3xl font-bold text-center mb-6">Gestion du contenu</h1>
 
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center ml-10 mr-10">
                 <input
                     type="text"
                     placeholder="Rechercher..."
@@ -128,20 +196,18 @@ export default function AdminContentPage() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <select
-                    value={selectedType}
-                    onChange={(e) => setSelectedType(e.target.value)}
-                    className="p-2 rounded border border-white bg-transparent text-white w-60"
-                >
-                    <option value="">Tous</option>
-                    <option value="0">Projet</option>
-                    <option value="1">Compétence</option>
-                </select>
+                <CustomSelect className={"w-60"} selectedValue={selectedType} setSelectedValue={setSelectedType} placeholder={"Tous"} options={typeOptions}/>
                 <button
                     onClick={handleAddContent}
                     className="bg-green-500 px-4 py-2 w-60 text-white rounded hover:bg-green-400"
                 >
                     Nouveau contenu
+                </button>
+                <button
+                    onClick={handleAssignationToggle}
+                    className="bg-blue-500 px-4 py-2 w-60 text-white rounded hover:bg-blue-400"
+                >
+                    Gérer les assignations
                 </button>
             </div>
 
@@ -167,10 +233,10 @@ export default function AdminContentPage() {
                                     >
                                         Modifier
                                     </button>
-                                    <button className="bg-blue-500 px-4 py-2 text-white rounded hover:bg-blue-400">
+                                    <button onClick={() => router.push(`/admin/contenu/edit/${contenu.idContenu}`)} className="bg-blue-500 px-4 py-2 text-white rounded hover:bg-blue-400">
                                         Modifier la page
                                     </button>
-                                    <button className="bg-red-500 px-4 py-2 text-white rounded hover:bg-red-400" onClick={() => handleDelete(contenu.idContenu)}>
+                                    <button className="bg-red-500 px-4 py-2 text-white rounded hover:bg-red-400" onClick={() => toggleDeleteDisclaimer(contenu)}>
                                         Supprimer
                                     </button>
                                 </div>
@@ -188,6 +254,18 @@ export default function AdminContentPage() {
             {/* Formulaire d'édition de contenu */}
             {isEditFormVisible && contentToEdit && (
                 <EditContentForm images={images} contentToEdit={contentToEdit} onCancel={handleEditCancel} onSuccess={fetchContenus}/>
+            )}
+
+            {/* Formulaire de liaison page-contenu */}
+            {isPageContenuFormVisible && <PageContenuForm onCancel={() => setIsPageContenuFormVisible(false)} />}
+
+            {/* Message de confirmation pour la suppression */}
+            {isDeleteDisclaimerVisible && disclaimerContent && (
+                <DisclaimerMsgConfirm
+                    onConfirm={disclaimerContent.onConfirm}
+                    onCancel={disclaimerContent.onCancel}
+                    msg={disclaimerContent.msg}
+                />
             )}
         </div>
     );

@@ -1,6 +1,7 @@
 // app/comptetences/page.tsx
-import CompetencesList from "@/components/Competances/CompetencesList";
+
+import ContenuList from "@/components/front/ContenuList";
 
 export default function CompetencesPage() {
-  return <CompetencesList apiEndpoint="/api/competences" />;
+    return <ContenuList contenuType={1} />;
 }

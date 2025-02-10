@@ -18,8 +18,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log(req.body);
 
     const params = req.body;
+    console.log(params);
+    console.log(params.action);
 
-    if (!params.action) {
+    if (params.action === undefined) {
         return res.status(400).json({ error: "L'action est requise." });
     }
 
@@ -28,13 +30,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         switch (params.action) {
             case 0: // Créer une page
-                if (!params.titre || !params.description || !params.type || !params.imagePrincContenu || !params.page) {
+                if (!params.titre || !params.description || !params.type || !params.imagePrincContenu || !params.specificData || !params.page) {
                     return res.status(400).json({ error: 'Tous les champs sont requis pour la création.' });
                 }
 
                 const createResult = await connection.execute(
-                    `INSERT INTO Contenu (titre, description, type, imagePrincContenu, page) VALUES (?, ?, ?, ?, ?)`,
-                    [params.titre, params.description, params.type, params.imagePrincContenu, params.page]
+                    `INSERT INTO Contenu (titre, description, type, imagePrincContenu, specificData, page) VALUES (?, ?, ?, ?, ?, ?)`,
+                    [params.titre, params.description, params.type, params.imagePrincContenu, params.specificData, params.page]
                 );
 
                 await connection.end();
@@ -63,6 +65,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (params.imagePrincContenu) {
                     SQL += "imagePrincContenu = ?, ";
                     edits.push(params.imagePrincContenu);
+                }
+                if (params.specificData) {
+                    SQL += "specificData = ?, ";
+                    edits.push(params.specificData);
                 }
                 if (params.page) {
                     SQL += "page = ?, ";

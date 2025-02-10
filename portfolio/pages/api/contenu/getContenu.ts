@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import mysql from 'mysql2/promise';
+import mysql, {RowDataPacket} from 'mysql2/promise';
 
 async function connect() {
     return mysql.createConnection({
@@ -29,16 +29,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     return res.status(400).json({ error: "L'ID du contenu est requis." });
                 }
 
-                const [content] = await connection.execute(
+                const [content] = await connection.execute<RowDataPacket[]>(
                     "SELECT * FROM Contenu WHERE idContenu = ?",
                     [params.id]
                 );
+
+                if (content.length === 0) {
+                    await connection.end();
+                    return res.status(404).json({ error: "Contenu non trouvé." });
+                }
 
                 await connection.end();
                 return res.status(200).json(content);
 
             case 1: // Rechercher du contenu avec des critères (titre et/ou type)
-                let SQL = "SELECT idContenu, titre, description, type, imagePrincContenu FROM Contenu WHERE ";
+                let SQL = "SELECT idContenu, titre, description, type, imagePrincContenu, specificData FROM Contenu WHERE ";
                 let whereClauses = [];
                 let values: any[] = [];
 
@@ -52,7 +57,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }
 
                 if (whereClauses.length === 0) {
-                    SQL = "SELECT idContenu, titre, description, type, imagePrincContenu FROM Contenu";
+                    SQL = "SELECT idContenu, titre, description, type, imagePrincContenu, specificData FROM Contenu";
                 } else {
                     SQL += whereClauses.join(" AND ");
                 }
