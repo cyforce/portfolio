@@ -18,8 +18,9 @@ interface Contenu {
     idContenu: number;
     titre: string;
     description: string;
+    specificData: string;
     imagePrincContenu: number;
-    type: string;
+    type: number;
 }
 
 interface disclaimerContentType {
@@ -42,6 +43,18 @@ export default function AdminContentPage() {
 
     const router = useRouter();
 
+    const cadres = [
+        { value: "", label: "Sélectionner le cadre du projet" },
+        { value: "0", label: "Études" },
+        { value: "1", label: "Professionnel" },
+        { value: "2", label: "Personnel" },
+    ]
+    const levels = [
+        { value: "", label: "Sélectionner le niveau" },
+        { value: "0", label: "Débutant" },
+        { value: "1", label: "Intermédiaire" },
+        { value: "2", label: "Avancé" },
+    ];
     const typeOptions = [
         {value: "", label: "Tous"},
         {value: "0", label: "Projet"},
@@ -178,6 +191,45 @@ export default function AdminContentPage() {
         }
     }
 
+    const renderSpecificData = (contenu: Contenu) => {
+        const specificDataJSON = JSON.parse(contenu.specificData);
+
+        const type = typeOptions.find((option) => option.value === contenu.type.toString());
+
+        // console.log(contenu.type);
+
+        if (contenu.type === 0) {
+            const cadre = cadres.find((cadre) => cadre.value === specificDataJSON.cadre);
+
+            return (
+                <p className="text-sm mt-2">
+                    <span className={"font-bold"}>Type:</span> {type ? type.label : "Inconnu"}
+                    <br/>
+                    <span className="font-bold">Cadre du projet:</span> {cadre ? cadre.label : "Inconnu"}
+                </p>
+            );
+        } else if (contenu.type === 1) {
+            const cadre = cadres.find((cadre) => cadre.value === specificDataJSON.cadre);
+            const level = levels.find((level) => level.value === specificDataJSON.level);
+
+            return (
+                <p className="text-sm mt-2">
+                    <span className={"font-bold"}>Type:</span> {type ? type.label : "Inconnu"}
+                    <br/>
+                    <span className="font-bold">Cadre d'apprentissage:</span> {cadre ? cadre.label : "Inconnu"}
+                    <br/>
+                    <span className="font-bold">Niveau:</span> {level ? level.label : "Inconnu"}
+                </p>
+            );
+        } else if (contenu.type === 2) {
+            return (
+                <p className="text-sm mt-2">
+                    <span className={"font-bold"}>Type:</span> {type ? type.label : "Inconnu"}
+                </p>
+            );
+        }
+    }
+
     return (
         <div className="text-white min-h-screen relative">
             <button
@@ -226,6 +278,7 @@ export default function AdminContentPage() {
                                 />
                                 <h2 className="text-xl font-bold overflow-hidden">{contenu.titre}</h2>
                                 <p className="text-sm whitespace-normal break-words overflow-wrap">{contenu.description}</p>
+                                {renderSpecificData(contenu)}
                                 <div className="mt-4 flex justify-between">
                                     <button
                                         className="bg-blue-500 px-4 py-2 text-white rounded hover:bg-blue-400"

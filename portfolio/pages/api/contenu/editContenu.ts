@@ -15,11 +15,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(405).json({ error: 'Méthode non autorisée. Utilisez POST.' });
     }
 
-    console.log(req.body);
+    // console.log(req.body);
 
     const params = req.body;
-    console.log(params);
-    console.log(params.action);
+    // console.log(params);
+    // console.log(params.action);
 
     if (params.action === undefined) {
         return res.status(400).json({ error: "L'action est requise." });

@@ -18,6 +18,9 @@ const AddContentForm = ({ images, onCancel, onSuccess }: AddContentFormProps) =>
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [selectedType, setSelectedType] = useState("");
+    const [selectedCadreProj, setSelectedCadreProj] = useState("");
+    const [selectedCadre, setSelectedCadre] = useState("");
+    const [selectedLevel, setSelectedLevel] = useState("");
     const [selectedImage, setSelectedImage] = useState<number>(2);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -32,12 +35,36 @@ const AddContentForm = ({ images, onCancel, onSuccess }: AddContentFormProps) =>
             setIsSubmitting(false);
             return;
         }
-        // TODO: Ajouter les nouveaux champs spécifiques à chaque type de contenu dans la requete
+
+        let specData = JSON.stringify({});
+
+        switch (selectedType) {
+            case "0":
+                if (!selectedCadreProj) {
+                    setErrorMessage("Veuillez sélectionner le cadre du projet.");
+                    setIsSubmitting(false);
+                    return;
+                } else {
+                    specData = JSON.stringify({ cadre: selectedCadreProj });
+                }
+                break;
+            case "1":
+                if (!selectedCadre || !selectedLevel) {
+                    setErrorMessage("Veuillez sélectionner le cadre d'apprentissage et le niveau.");
+                    setIsSubmitting(false);
+                    return;
+                } else {
+                    specData = JSON.stringify({ cadre: selectedCadre, level: selectedLevel });
+                }
+                break;
+        }
+
         const newContent = {
             titre: title,
             description,
             type: selectedType,
             imagePrincContenu: selectedImage,
+            specificData: specData,
             page: JSON.stringify([]),
             action: 0,
         };
@@ -72,6 +99,20 @@ const AddContentForm = ({ images, onCancel, onSuccess }: AddContentFormProps) =>
         { value: "0", label: "Projet" },
         { value: "1", label: "Compétence" },
         { value: "2", label: "Page classique" },
+    ];
+
+    const cadres = [
+        { value: "", label: "Sélectionner le cadre du projet" },
+        { value: "0", label: "Études" },
+        { value: "1", label: "Professionnel" },
+        { value: "2", label: "Personnel" },
+    ]
+
+    const levels = [
+        { value: "", label: "Sélectionner le niveau" },
+        { value: "0", label: "Débutant" },
+        { value: "1", label: "Intermédiaire" },
+        { value: "2", label: "Avancé" },
     ];
 
     return (
@@ -126,7 +167,40 @@ const AddContentForm = ({ images, onCancel, onSuccess }: AddContentFormProps) =>
                         />
                     </div>
 
-                    // TODO: Ajouter les champs spécifiques à chaque type de contenu
+                    {selectedType == "0" && (
+                        <div className="space-y-2">
+                            <label className="text-white">Cadre du projet</label>
+                            <CustomSelect
+                                selectedValue={selectedCadreProj}
+                                setSelectedValue={setSelectedCadreProj}
+                                options={cadres}
+                                placeholder={"Sélectionner le cadre du projet"}
+                            />
+                        </div>
+                    )}
+
+                    {selectedType == "1" && (
+                        <div className="space-y-2">
+                            <div className="space-y-2">
+                                <div className="text-white">Cadre d'apprentissage</div>
+                                <CustomSelect
+                                    selectedValue={selectedCadre}
+                                    setSelectedValue={setSelectedCadre}
+                                    options={cadres}
+                                    placeholder={"Sélectionner le cadre d'apprentissage"}
+                                />
+                            </div>
+                            <div className={"space-y-2"}>
+                                <label className="text-white">Niveau</label>
+                                <CustomSelect
+                                    selectedValue={selectedLevel}
+                                    setSelectedValue={setSelectedLevel}
+                                    options={levels}
+                                    placeholder={"Sélectionner le niveau"}
+                                />
+                            </div>
+                        </div>
+                    )}
 
                     {errorMessage && (
                         <div className="text-red-500 text-center mt-4">

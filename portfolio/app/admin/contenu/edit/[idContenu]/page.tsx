@@ -66,6 +66,7 @@ export default function Page() {
 
     useEffect(() => {
         if (!params.idContenu) {
+            router.refresh();
             router.push("/admin/contenu"); // Redirection si l'ID est absent
             return;
         }
@@ -151,6 +152,7 @@ export default function Page() {
             // Vérification de la réponse avant de rediriger
             const data = await response.json();
             if (response.ok) {
+                router.refresh();
                 router.push("/admin/contenu");
             } else {
                 console.error("Erreur:", data.error);

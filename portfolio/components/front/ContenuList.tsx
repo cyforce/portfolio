@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import CustomSelect from "@/components/front/CustomSelect";
 
 interface Image {
     idImage: number;
@@ -12,8 +13,9 @@ interface Contenu {
     idContenu: number;
     titre: string;
     description: string;
-    imagePrincContenu: Image; // Correction ici
-    type: string;
+    specificData: string;
+    imagePrincContenu: Image;
+    type: number;
 }
 
 interface ContenuListProps {
@@ -25,6 +27,21 @@ const ContenuList: React.FC<ContenuListProps> = ({ contenuType }) => {
     const [images, setImages] = useState<Image[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [searchQuery, setSearchQuery] = useState("");
+    const [selectedCadre, setSelectedCadre] = useState("");
+    const [selectedLevel, setSelectedLevel] = useState("");
+
+    const cadres = [
+        { value: "", label: "Tous les cadres" },
+        { value: "0", label: "Études" },
+        { value: "1", label: "Professionnel" },
+        { value: "2", label: "Personnel" },
+    ]
+    const levels = [
+        { value: "", label: "Tous les niveaux" },
+        { value: "0", label: "Débutant" },
+        { value: "1", label: "Intermédiaire" },
+        { value: "2", label: "Avancé" },
+    ];
 
     // Récupération des images
     useEffect(() => {
@@ -76,6 +93,7 @@ const ContenuList: React.FC<ContenuListProps> = ({ contenuType }) => {
                             idContenu: content.idContenu,
                             titre: content.titre,
                             description: content.description,
+                            specificData: content.specificData,
                             imagePrincContenu: foundImage || { idImage: 0, url: `/images/placeholder.png`, alt: "Image non trouvée" },
                             type: content.type,
                         };
@@ -94,30 +112,79 @@ const ContenuList: React.FC<ContenuListProps> = ({ contenuType }) => {
         fetchContenu();
     }, [contenuType, images]); // Déclenché après le chargement des images
 
-    const filteredContents = contents.filter(
-        (content) =>
+    const filteredContents = contents.filter((content) => {
+        let parsedData = content.specificData ? JSON.parse(content.specificData) : {};
+
+        // console.log("🔍 Contenu analysé :", parsedData);
+        // console.log("✅ Niveau stocké :", parsedData.level, " | Type :", typeof parsedData.level);
+        // console.log("✅ Niveau sélectionné :", selectedLevel, " | Type :", typeof selectedLevel);
+
+        const matchesSearch =
             content.titre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            content.description.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+            content.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+        const matchesCadre = selectedCadre === "" || parsedData.cadre?.toString() === selectedCadre;
+        const matchesLevel = selectedLevel === "" || String(parsedData.level) === selectedLevel;
+
+        return matchesSearch && matchesCadre && matchesLevel;
+    });
+
+    const renderSpecificData = (contenu: Contenu) => {
+        const specificDataJSON = JSON.parse(contenu.specificData);
+
+
+        if (contenuType === 0) {
+            const cadre = cadres.find((cadre) => cadre.value === specificDataJSON.cadre);
+
+            return (
+                <p className="text-white">
+                    <span className="font-bold">Cadre du projet:</span> {cadre ? cadre.label : "Inconnu"}
+                </p>
+            );
+        } else if (contenu.type === 1) {
+            const cadre = cadres.find((cadre) => cadre.value === specificDataJSON.cadre);
+            const level = levels.find((level) => level.value === specificDataJSON.level);
+
+            return (
+                <p className="text-white">
+                    <span className="font-bold">Cadre d'apprentissage:</span> {cadre ? cadre.label : "Inconnu"}
+                    <br/>
+                    <span className="font-bold">Niveau:</span> {level ? level.label : "Inconnu"}
+                </p>
+            );
+        }
+    }
 
     return (
         <div className="w-full max-w-4xl mx-auto p-4">
             {/* Champ de recherche */}
             <div className="mb-4 flex items-center justify-evenly">
-                <input
-                    type="text"
-                    placeholder="Rechercher un contenu..."
-                    className="w-full p-2 border border-gray-300 bg-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                {/* TODO: - Ajouter un bouton pour effacer le champ de recherche
-                 *        - Ajouter un select pour le niveau
-                */}
+                <div className={"w-1/2"}>
+                    <input
+                        type="text"
+                        placeholder="Rechercher par nom..."
+                        className="w-60 p-2 border border-gray-300 bg-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+
+                {contenuType === 0 && (
+                    <div className={"w-1/2"}>
+                        <CustomSelect selectedValue={selectedCadre} setSelectedValue={setSelectedCadre} options={cadres} placeholder={cadres[0].label} className={"min-w-32"}/>
+                    </div>
+                )}
+
+                {contenuType === 1 && (
+                    <div className={"w-1/2 flex justify-between"}>
+                        <CustomSelect selectedValue={selectedCadre} setSelectedValue={setSelectedCadre} options={cadres} placeholder={cadres[0].label} className={"min-w-32"}/>
+                        <CustomSelect selectedValue={selectedLevel} setSelectedValue={setSelectedLevel} options={levels} placeholder={levels[0].label} className={"min-w-32"}/>
+                    </div>
+                )}
             </div>
 
             {/* Contenu */}
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 justify-center">
                 {loading ? (
                     <p className="text-center w-screen">Chargement...</p>
                 ) : filteredContents.length > 0 ? (
@@ -133,6 +200,7 @@ const ContenuList: React.FC<ContenuListProps> = ({ contenuType }) => {
                             />
                             <h3 className="text-lg font-semibold">{content.titre}</h3>
                             <p className="text-sm">{content.description}</p>
+                            {renderSpecificData(content)}
                         </div>
                     ))
                 ) : (
