@@ -29,6 +29,7 @@ const ContenuList: React.FC<ContenuListProps> = ({ contenuType }) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCadre, setSelectedCadre] = useState("");
     const [selectedLevel, setSelectedLevel] = useState("");
+    const [type, setType] = useState("");
 
     const cadres = [
         { value: "", label: "Tous les cadres" },
@@ -42,6 +43,15 @@ const ContenuList: React.FC<ContenuListProps> = ({ contenuType }) => {
         { value: "1", label: "Intermédiaire" },
         { value: "2", label: "Avancé" },
     ];
+    const types = [
+        { value: 0, label: "projets" },
+        { value: 1, label: "competences" },
+    ];
+
+    useEffect(() => {
+        const type = types.find((type) => type.value === contenuType);
+        setType(type ? type.label : "");
+    }, [contenuType]);
 
     // Récupération des images
     useEffect(() => {
@@ -155,6 +165,43 @@ const ContenuList: React.FC<ContenuListProps> = ({ contenuType }) => {
         }
     }
 
+    const renderContents = (filteredContents: Contenu[]) => {
+        return filteredContents.map((content) => {
+            const href = type === "" ? undefined : `/${type}/${content.idContenu.toString()}`;
+
+            return (
+                <div
+                    key={content.idContenu}
+                    className="bg-gray-800 text-white max-w-60 shadow-lg rounded-lg  transition-transform transform hover:scale-105"
+                >
+                    {href ? (
+                        <a href={href} className="block p-4">
+                            <img
+                                src={content.imagePrincContenu.url}
+                                alt={content.imagePrincContenu.alt}
+                                className="w-full h-48 object-cover rounded-lg mb-3"
+                            />
+                            <h3 className="text-lg font-semibold">{content.titre}</h3>
+                            <p className="text-sm">{content.description}</p>
+                            {renderSpecificData(content)}
+                        </a>
+                    ) : (
+                        <>
+                            <img
+                                src={content.imagePrincContenu.url}
+                                alt={content.imagePrincContenu.alt}
+                                className="w-full h-48 object-cover rounded-lg mb-3"
+                            />
+                            <h3 className="text-lg font-semibold">{content.titre}</h3>
+                            <p className="text-sm">{content.description}</p>
+                            {renderSpecificData(content)}
+                        </>
+                    )}
+                </div>
+            );
+        });
+    };
+
     return (
         <div className="w-full max-w-4xl mx-auto p-4">
             {/* Champ de recherche */}
@@ -188,21 +235,7 @@ const ContenuList: React.FC<ContenuListProps> = ({ contenuType }) => {
                 {loading ? (
                     <p className="text-center w-screen">Chargement...</p>
                 ) : filteredContents.length > 0 ? (
-                    filteredContents.map((content) => (
-                        <div
-                            key={content.idContenu}
-                            className="bg-gray-800 text-white max-w-60 shadow-lg rounded-lg p-4 transition-transform transform hover:scale-105"
-                        >
-                            <img
-                                src={content.imagePrincContenu.url}
-                                alt={content.imagePrincContenu.alt}
-                                className="w-full h-48 object-cover rounded-lg mb-3"
-                            />
-                            <h3 className="text-lg font-semibold">{content.titre}</h3>
-                            <p className="text-sm">{content.description}</p>
-                            {renderSpecificData(content)}
-                        </div>
-                    ))
+                    renderContents(filteredContents)
                 ) : (
                     <p className="text-center text-white">Aucun contenu disponible.</p>
                 )}

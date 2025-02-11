@@ -5,6 +5,7 @@ import ShowContentsPage from "@/components/front/affichageComposants"; // Utilis
 
 interface displayPageProps {
     pageID: number;
+    mode?: number;
 }
 
 interface Image {
@@ -28,7 +29,7 @@ interface Contenu {
     page: ComposantData[];
 }
 
-const DisplayPage = ({ pageID }: displayPageProps) => {
+const DisplayPage = ({ pageID, mode=0 }: displayPageProps) => {
     const [images, setImages] = useState<Image[]>([]);
     const [idContenu, setIdContenu] = useState<number | null>(null);
     const [contenu, setContenu] = useState<Contenu | null>(null);
@@ -135,18 +136,22 @@ const DisplayPage = ({ pageID }: displayPageProps) => {
         };
 
         const getContenuID = async () => {
-            // console.log("Fetching content ID for pageID:", pageID); // Log de débogage
-            try {
-                const response = await fetch("/api/contenu/PageAttribution", {
-                    method: "POST",
-                    body: JSON.stringify({ action: 1, pageID }),
-                    headers: { "Content-Type": "application/json" },
-                });
-                const data = await response.json();
-                // console.log("Contenu ID récupéré:", data);
-                setIdContenu(data.result[0].Contenu);  // Mettre à jour idContenu
-            } catch (error) {
-                console.error("Erreur lors de la récupération du contenu :", error);
+            if (mode !== 1) {
+                // console.log("Fetching content ID for pageID:", pageID); // Log de débogage
+                try {
+                    const response = await fetch("/api/contenu/PageAttribution", {
+                        method: "POST",
+                        body: JSON.stringify({action: 1, pageID}),
+                        headers: {"Content-Type": "application/json"},
+                    });
+                    const data = await response.json();
+                    // console.log("Contenu ID récupéré:", data);
+                    setIdContenu(data.result[0].Contenu);  // Mettre à jour idContenu
+                } catch (error) {
+                    console.error("Erreur lors de la récupération du contenu :", error);
+                }
+            } else {
+                setIdContenu(pageID);
             }
         };
 
@@ -176,7 +181,7 @@ const DisplayPage = ({ pageID }: displayPageProps) => {
             {contenu != null ? (
                 <ShowContentsPage comps={contenu.page}  />
             ) : (
-                <p>Loading content...</p> // Message de chargement si le contenu n'est pas encore disponible
+                <p className={"w-screen mt-[3.45rem] text-center"}>Chargement de la page...</p> // Message de chargement si le contenu n'est pas encore disponible
             )}
         </div>
     );
