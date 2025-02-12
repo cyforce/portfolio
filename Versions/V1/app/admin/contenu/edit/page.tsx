@@ -1,14 +1,10 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import CustomImageSelect from "@/components/Contenu/CustomImageSelect";
-import CustomSelect from "@/components/front/CustomSelect";
+import {useEffect, useState} from "react";
 import Composant1 from "@/components/composants/1";
 import Composant2 from "@/components/composants/2";
 import Composant3 from "@/components/composants/3";
-import P404 from "@/components/front/p404";
-import ContenuList from "@/components/composants/4";
+import CustomImageSelect from "@/components/Contenu/CustomImageSelect";
 
 interface Image {
     idImage: number;
@@ -22,41 +18,31 @@ interface ComposantData {
     imgs: Image[];
 }
 
-interface ComposantDeMerde {
-    type: number;
-    texts: string[];
-    imgs: number[];
-}
-
-interface Contenu {
-    idContenu: number;
-    titre: string;
-    description: string;
-    imagePrincContenu: number;
-    type: string;
-    page: ComposantData[];
-}
-
-export default function Page() {
-    const [images, setImages] = useState<Image[]>([]);
-    const [contenu, setContenu] = useState<Contenu | null>(null);
+export default function EditContentPage() {
     const [addComposant, setAddComposant] = useState(false);
     const [composantType, setComposantType] = useState("0");
     const [selectedImages, setSelectedImages] = useState<number[]>([]);
     const [newComposantTxts, setNewComposantTxts] = useState<string[]>([]);
     const [insertionIndex, setInsertionIndex] = useState<number | null>(null);
     const [editingIndex, setEditingIndex] = useState(-1);
-    const [cancelDisclaimer, setCancelDisclaimer] = useState(false)
-    const [idContenu, setIdContenu] = useState(-1)
-    const [selectedCustomData, setSelectedCustomData] = useState<number[]>([]);
-
-    const router = useRouter();
-    const params = useParams<{ idContenu: string }>() ?? { idContenu: "" };
-
-    const customData4 = [
-        {value: "0", label: "Projet"},
-        {value: "1", label: "Competence"},
-    ];
+    const [images, setImages] = useState<Image[]>([]);
+    const [page, setPage] = useState<ComposantData[]>([
+        {
+            type: 1,
+            texts: ["Titre 1", "Description 1"],
+            imgs: [{ idImage: 0, url: "placholder6.jpg", alt: "Image 1" }],
+        },
+        {
+            type: 2,
+            texts: ["Titre 2", "Description 2"],
+            imgs: [{ idImage: 0, url: "placholder6.jpg", alt: "Image 2" }],
+        },
+        {
+            type: 3,
+            texts: ["Titre 3", "Description 3"],
+            imgs: [{ idImage: 0, url: "placholder6.jpg", alt: "Image 3" }],
+        },
+    ]);
 
     useEffect(() => {
         const fetchImages = async () => {
@@ -68,118 +54,12 @@ export default function Page() {
                 console.error("Erreur lors de la récupération des images :", error);
             }
         };
-
         fetchImages();
-    }, []); // Chargement des images au montage du composant
-
-    useEffect(() => {
-        if (!params.idContenu) {
-            router.refresh();
-            router.push("/admin/contenu"); // Redirection si l'ID est absent
-            return;
-        }
-
-        setIdContenu(parseInt(params.idContenu));
-    }, [params.idContenu, router]); // Exécuter lorsque `idContenu` change
-
-    useEffect(() => {
-        if (!idContenu || images.length === 0) return; // Attendre que `idContenu` et `images` soient chargés
-
-        const fetchContenu = async (id: number) => {
-            try {
-                const res = await fetch("/api/contenu/getContenu", {
-                    method: "POST",
-                    body: JSON.stringify({ action: 0, id }),
-                    headers: { "Content-Type": "application/json" },
-                });
-                const data = await res.json();
-
-                if (!data || data.length === 0 || !data[0]) {
-                    console.error("Contenu non trouvé.");
-                    return 404;
-                }
-
-                const page = JSON.parse(data[0].page);
-
-                const vraiPage: ComposantData[] = page.map((composant: ComposantDeMerde) => ({
-                    type: composant.type,
-                    texts: composant.texts,
-                    imgs: composant.imgs.map((imgID: number) =>
-                        images.find((img) => img.idImage === imgID) || { idImage: imgID, url: "", alt: "Image non trouvée" }
-                    ),
-                }));
-
-                const contenuFinal: Contenu = {
-                    idContenu: data[0].idContenu,
-                    titre: data[0].titre,
-                    description: data[0].description,
-                    imagePrincContenu: data[0].imagePrincContenu,
-                    type: data[0].type,
-                    page: vraiPage,
-                };
-
-                setContenu(contenuFinal);
-            } catch (error) {
-                console.error("Erreur lors de la récupération des contenus:", error);
-            }
-        };
-
-        fetchContenu(idContenu).then((result) => {
-            if (result === 404) {
-                setContenu({
-                    idContenu: -1,
-                    titre: "Je suis faux",
-                    description: "Otters are cute",
-                    imagePrincContenu: -1,
-                    type: "Ce portfolio ...",
-                    page: [],
-                });
-            }
-        });
-
-    }, [idContenu, images]); // Exécuter seulement lorsque `idContenu` ou `images` changent
-
-    const saveAndQuit = async () => {
-        try {
-            const pageAuFormatBDD: ComposantDeMerde[] = contenu?.page.map((composant, index) => {
-                const isComposantType4 = composant.type === 4;
-
-                // Si c'est un composant de type 4, ajouter customData
-                const customData = isComposantType4 ? selectedCustomData[index] : null;
-
-                return {
-                    type: composant.type,  // Type du composant
-                    texts: composant.texts,  // Les textes du composant
-                    imgs: composant.imgs.map(img => img.idImage),  // Extraction des IDs d'images
-                    customData: customData, // Ajouter customData ici pour le composant de type 4
-                };
-            }) || [];  // Si contenu?.page est undefined, on retourne un tableau vide
-
-            const response = await fetch("/api/contenu/editContenu", {
-                method: "POST",
-                body: JSON.stringify({
-                    action: 1,
-                    idContenu: contenu?.idContenu,
-                    page: JSON.stringify(pageAuFormatBDD),
-                }),
-                headers: { "Content-Type": "application/json" },
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                router.refresh();
-                router.push("/admin/contenu");
-            } else {
-                console.error("Erreur:", data.error);
-            }
-        } catch (error) {
-            console.error("Erreur lors de la sauvegarde du contenu :", error);
-        }
-    };
+    }, []);
 
     const getImage = (idImage: number): Image | undefined => {
         return images.find((image) => image.idImage === idImage);
-    };
+    }
 
     const handleImageSelect = (index: number, imageId: number) => {
         setSelectedImages((prev) => {
@@ -197,18 +77,9 @@ export default function Page() {
         });
     };
 
-    const handleCustomDataChange = (index: number, value: number) => {
-        setSelectedCustomData((prev) => {
-            const newCustomData = [...prev];
-            newCustomData[index] = value;
-            return newCustomData;
-        });
-    }
-
     function handleComposantAddToggle(index: number | null = null) {
         setAddComposant(!addComposant);
         document.body.style.overflowY = addComposant ? "auto" : "hidden";
-
         setSelectedImages([]);
         setNewComposantTxts([]);
         setComposantType("0");
@@ -225,106 +96,85 @@ export default function Page() {
         const newComposant: ComposantData = {
             type: parseInt(composantType),
             texts: newComposantTxts,
-            imgs: selectedImages.map((idImage) => getImage(idImage) ?? { idImage, url: "", alt: "" }),
+            imgs: selectedImages.map((idImage) => (getImage(idImage) ?? { idImage: 0, url: "", alt: "" })),
         };
 
-        setContenu((prevContenu) => {
-            if (!prevContenu) return prevContenu; // Sécurité
+        console.log(newComposant);
 
-            const newPage = [...prevContenu.page];
-
+        setPage((prevPage) => {
+            const newPage = [...prevPage];
             if (insertionIndex !== null) {
-                newPage.splice(insertionIndex, 0, newComposant); // Insère à l'index donné
+                newPage.splice(insertionIndex, 0, newComposant); // Insère à l'index spécifié
             } else {
-                newPage.push(newComposant); // Ajoute à la fin
+                newPage.push(newComposant); // Ajoute à la fin si aucun index n'est spécifié
             }
-
-            return { ...prevContenu, page: newPage };
+            return newPage;
         });
 
         handleComposantAddToggle(); // Ferme le modal après l'ajout
     }
 
     function handleComposantEdit(index: number, updatedComposant: Partial<ComposantData>) {
-        setContenu((prevContenu) => {
-            if (!prevContenu) return prevContenu; // Sécurité
+        setPage((prevPage) => {
+            const newPage = [...prevPage];
 
-            const newPage = [...prevContenu.page];
-
-            // Transformation des IDs d'images en objets Image
+            // Transformation des IDs d'images en objets Image complets
             const updatedImgs = updatedComposant.imgs
-                ? selectedImages.map((img) =>
-                    typeof img === "number"
-                        ? getImage(img) ?? { idImage: img, url: "", alt: "Image non trouvée" }
-                        : img
-                )
+                ? updatedComposant.imgs.map((img) => ({
+                    idImage: img.idImage,
+                    url: getImage(img.idImage)?.url || "",
+                    alt: getImage(img.idImage)?.alt || "",
+                }))
                 : newPage[index].imgs;
 
-            // Mise à jour du composant
+            // Mise à jour du composant ciblé
             newPage[index] = {
                 ...newPage[index],
                 ...updatedComposant,
                 texts: updatedComposant.texts ?? newPage[index].texts,
-                imgs: updatedImgs, // Fix : S'assurer que c'est bien des objets Image
+                imgs: updatedImgs, // Correction : On met bien à jour l'URL et l'ALT
             };
 
-            return { ...prevContenu, page: newPage };
+            console.log(newPage[index]);
+            return newPage; // Mise à jour de l'état
         });
     }
 
-    function handleComposantEditToggle(index: number) {
-        if (editingIndex === -1) {
-            // Ouverture de l'éditeur
+    function handleComposantEditToggle(index:number){
+        if(editingIndex === -1){
             setEditingIndex(index);
-
-            // Vérifie si contenu et page existent avant d'y accéder
-            const composant = contenu?.page[index];
-            if (composant) {
-                setNewComposantTxts(composant.texts);
-                setSelectedImages(composant.imgs.map((img) => img.idImage));
+            switch (page[index].type) {
+                case 1:
+                    setNewComposantTxts(page[index].texts);
+                    setSelectedImages(page[index].imgs.map((img) => img.idImage));
+                    break;
+                case 2:
+                    setNewComposantTxts(page[index].texts);
+                    setSelectedImages(page[index].imgs.map((img) => img.idImage));
+                    break;
+                case 3:
+                    setNewComposantTxts(page[index].texts);
+                    setSelectedImages(page[index].imgs.map((img) => img.idImage));
+                    break
+                default:
+                    break;
             }
         } else {
-            // Fermeture de l'éditeur
             setEditingIndex(-1);
             setNewComposantTxts([]);
             setSelectedImages([]);
         }
     }
 
-    useEffect(() => {
-        if (editingIndex !== -1) {
-            document.body.style.overflowY = "hidden";
-        } else {
-            document.body.style.overflowY = "auto";
-        }
-
-        return () => {
-            document.body.style.overflowY = "auto";
-        };
-    }, [editingIndex]);
-
     function handleDeleteComposant(index: number) {
-        setContenu((prevContenu) => {
-            if (!prevContenu) return prevContenu; // Sécurité
-
-            const newPage = [...prevContenu.page];
-            newPage.splice(index, 1); // Supprime l'élément à l'index donné
-
-            return { ...prevContenu, page: newPage }; // Met à jour l'état
+        setPage((prevPage) => {
+            const newPage = [...prevPage];
+            newPage.splice(index, 1);  // Supprimer l'élément à l'index donné
+            return newPage;
         });
     }
 
-    const handleCancelDisclaimerToggle = () => {
-        if(cancelDisclaimer) {
-            setCancelDisclaimer(false)
-            document.body.style.overflowY = "auto";
-        } else {
-            setCancelDisclaimer(true)
-            document.body.style.overflowY = "hidden";
-        }
-    }
-
-    const renderSpecificEditForm = (composant: ComposantData) => {
+   const renderSpecificEditForm = (composant:ComposantData) => {
         switch (composant.type) {
             case 1:
                 return (
@@ -345,10 +195,12 @@ export default function Page() {
                         />
                         <label className="block mb-2">Image :</label>
                         <CustomImageSelect
-                            selectedImage={selectedImages[0] ?? 0}
-                            setSelectedImage={(imageId) => handleImageSelect(0, imageId)}
-                            placeholder="Sélectionner une image"
-                            images={contenu?.page ? contenu.page.flatMap((composant) => composant.imgs) : []}
+                            selectedImage={selectedImages[0]}
+                            setSelectedImage={(imageId) =>
+                                handleImageSelect(0, imageId)
+                            }
+                            placeholder="Modifier l'image"
+                            images={page.flatMap((c) => c.imgs)}
                         />
                     </div>
                 );
@@ -359,7 +211,6 @@ export default function Page() {
                         <input
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
-                            placeholder="Gros 1"
                             defaultValue={composant.texts[0]}
                             onChange={(e) => handleTextChange(0, e.target.value)}
                         />
@@ -367,7 +218,6 @@ export default function Page() {
                         <input
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
-                            placeholder="Petit 1"
                             defaultValue={composant.texts[1]}
                             onChange={(e) => handleTextChange(1, e.target.value)}
                         />
@@ -375,7 +225,6 @@ export default function Page() {
                         <input
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
-                            placeholder="Gros 1"
                             defaultValue={composant.texts[2]}
                             onChange={(e) => handleTextChange(2, e.target.value)}
                         />
@@ -383,7 +232,6 @@ export default function Page() {
                         <input
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
-                            placeholder="Petit 1"
                             defaultValue={composant.texts[3]}
                             onChange={(e) => handleTextChange(3, e.target.value)}
                         />
@@ -391,7 +239,6 @@ export default function Page() {
                         <input
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
-                            placeholder="Gros 1"
                             defaultValue={composant.texts[4]}
                             onChange={(e) => handleTextChange(4, e.target.value)}
                         />
@@ -399,7 +246,6 @@ export default function Page() {
                         <input
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
-                            placeholder="Petit 1"
                             defaultValue={composant.texts[5]}
                             onChange={(e) => handleTextChange(5, e.target.value)}
                         />
@@ -408,7 +254,7 @@ export default function Page() {
                             selectedImage={selectedImages[0] ?? 0}
                             setSelectedImage={(imageId) => handleImageSelect(0, imageId)}
                             placeholder="Sélectionner une image"
-                            images={contenu?.page ? contenu.page.flatMap((composant) => composant.imgs) : []}
+                            images={page.flatMap((composant) => composant.imgs)}
                         />
                     </div>
                 );
@@ -420,13 +266,12 @@ export default function Page() {
                             selectedImage={selectedImages[0] ?? 0}
                             setSelectedImage={(imageId) => handleImageSelect(0, imageId)}
                             placeholder="Sélectionner une image"
-                            images={contenu?.page ? contenu.page.flatMap((composant) => composant.imgs) : []}
+                            images={page.flatMap((composant) => composant.imgs)}
                         />
                         <label className="block mb-2">Gros 1 :</label>
                         <input
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
-                            placeholder="Gros 1"
                             defaultValue={composant.texts[0]}
                             onChange={(e) => handleTextChange(0, e.target.value)}
                         />
@@ -434,7 +279,6 @@ export default function Page() {
                         <input
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
-                            placeholder="Petit 1"
                             defaultValue={composant.texts[1]}
                             onChange={(e) => handleTextChange(1, e.target.value)}
                         />
@@ -442,7 +286,6 @@ export default function Page() {
                         <input
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
-                            placeholder="Gros 1"
                             defaultValue={composant.texts[2]}
                             onChange={(e) => handleTextChange(2, e.target.value)}
                         />
@@ -450,7 +293,6 @@ export default function Page() {
                         <input
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
-                            placeholder="Petit 1"
                             defaultValue={composant.texts[3]}
                             onChange={(e) => handleTextChange(3, e.target.value)}
                         />
@@ -458,7 +300,6 @@ export default function Page() {
                         <input
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
-                            placeholder="Gros 1"
                             defaultValue={composant.texts[4]}
                             onChange={(e) => handleTextChange(4, e.target.value)}
                         />
@@ -466,35 +307,25 @@ export default function Page() {
                         <input
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
-                            placeholder="Petit 1"
                             defaultValue={composant.texts[5]}
                             onChange={(e) => handleTextChange(5, e.target.value)}
                         />
                     </div>
                 );
-            case 4:
-                <div className="w-full">
-                    <CustomSelect
-                        selectedValue={selectedCustomData[0].toString() ?? "0"}
-                        setSelectedValue={(value) => handleCustomDataChange(0, parseInt(value))}
-                        options={customData4}
-                        placeholder="Sélectionner une option"
-                    />
-                </div>
             default:
                 return <div></div>;
         }
-    };
+   }
 
     const renderEditForm = (index: number) => {
-        const composant: ComposantData | undefined = contenu?.page[index];
-        if (!composant) return null;
+        const composant = page[index];
 
         return (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[60] overflow-y-auto w-screen h-screen">
-                <form className="bg-gray-800 p-5 m-0 rounded-lg w-full max-w-md max-h-full overflow-y-auto">
+            <div className="fixed inset-x-0 top-[3.45rem] bottom-0 flex items-center justify-center bg-black bg-opacity-50 z-[60] overflow-y-auto w-screen h-[calc(100vh-3.45rem)]">
+                <form className="bg-gray-800 p-5 m-0 rounded-lg w-full max-w-md max-h-[calc(100vh-3.45rem)] overflow-y-auto">
                     <h2 className="text-lg font-bold mb-4">Modifier le composant</h2>
                     {renderSpecificEditForm(composant)}
+
                     <div className="flex justify-between mt-4">
                         <button
                             type="button"
@@ -525,6 +356,7 @@ export default function Page() {
             </div>
         );
     };
+
 
     const renderComposantsWithEdit = (composant: ComposantData, index: number) => (
         <div key={index} className="relative w-screen">
@@ -578,8 +410,6 @@ export default function Page() {
                 return <Composant2 key={index} texts={composant.texts} imgs={composant.imgs} className={"border-2 border-amber-600"}/>;
             case 3:
                 return <Composant3 key={index} texts={composant.texts} imgs={composant.imgs} className={"border-2 border-amber-600"}/>;
-            case 4:
-                return <ContenuList key={index} contenuType={selectedCustomData[0]} className={"border-2 border-amber-600"}/>;
             default:
                 return <div key={index} className="text-red-500">Type inconnu</div>;
         }
@@ -587,13 +417,9 @@ export default function Page() {
 
     const renderComposantAdd = () => (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[60] p-4 mt-[3.45rem]">
-            <form className="bg-gray-800 p-5 m-0 rounded-lg w-full max-w-md max-h-full overflow-y-auto">
+            <form className="bg-gray-800 p-5 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
                 <label className="block mb-2">Sélectionner le type à ajouter :</label>
-                <select
-                    onChange={handleTypeChange}
-                    className="w-full p-2 bg-gray-700 text-white rounded"
-                    value={composantType} // Assurez-vous que composantType est bien géré par un useState
-                >
+                <select onChange={handleTypeChange} className="w-full p-2 bg-gray-700 text-white rounded">
                     <option value="0">Sélectionner un type</option>
                     <option value="1">Titre et image en fond</option>
                     <option value="2">Texte gauche, image droite</option>
@@ -601,25 +427,17 @@ export default function Page() {
                 </select>
                 {renderComposantForm(composantType)}
                 <div className="flex justify-between mt-4">
-                    <button
-                        type="button"
-                        onClick={() => handleComposantAddToggle()}
-                        className="px-4 py-2 bg-red-500 hover:bg-red-400 rounded"
-                    >
+                    <button type="button" onClick={() => handleComposantAddToggle()} className="px-4 py-2 bg-red-500 hover:bg-red-400 rounded">
                         Annuler
                     </button>
-                    <button
-                        type="button"
-                        onClick={handleComposantAdd}
-                        className={`px-4 py-2 bg-green-500 hover:bg-green-400 rounded ${composantType === "0" ? "cursor-not-allowed opacity-50" : ""}`}
-                        disabled={composantType === "0"} // Désactiver si le type est 0
-                    >
+                    <button type="button" onClick={handleComposantAdd} className="px-4 py-2 bg-green-500 hover:bg-green-400 rounded">
                         Ajouter
                     </button>
                 </div>
             </form>
         </div>
     );
+
 
     const renderComposantForm = (type: string) => {
         switch (type) {
@@ -645,7 +463,7 @@ export default function Page() {
                             selectedImage={selectedImages[0] ?? 0}
                             setSelectedImage={(imageId) => handleImageSelect(0, imageId)}
                             placeholder="Sélectionner une image"
-                            images={images}
+                            images={page.flatMap((composant) => composant.imgs)}
                         />
                     </div>
                 );
@@ -671,35 +489,35 @@ export default function Page() {
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
                             placeholder="Gros 1"
-                            onChange={(e) => handleTextChange(2, e.target.value)}
+                            onChange={(e) => handleTextChange(0, e.target.value)}
                         />
                         <label className="block mb-2">Petit 2 :</label>
                         <input
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
                             placeholder="Petit 1"
-                            onChange={(e) => handleTextChange(3, e.target.value)}
+                            onChange={(e) => handleTextChange(1, e.target.value)}
                         />
                         <label className="block mb-2">Gros 3 :</label>
                         <input
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
                             placeholder="Gros 1"
-                            onChange={(e) => handleTextChange(4, e.target.value)}
+                            onChange={(e) => handleTextChange(0, e.target.value)}
                         />
                         <label className="block mb-2">Petit 3 :</label>
                         <input
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
                             placeholder="Petit 1"
-                            onChange={(e) => handleTextChange(5, e.target.value)}
+                            onChange={(e) => handleTextChange(1, e.target.value)}
                         />
                         <label className="block mb-2">Image :</label>
                         <CustomImageSelect
                             selectedImage={selectedImages[0] ?? 0}
                             setSelectedImage={(imageId) => handleImageSelect(0, imageId)}
                             placeholder="Sélectionner une image"
-                            images={images}
+                            images={page.flatMap((composant) => composant.imgs)}
                         />
                     </div>
                 );
@@ -711,7 +529,7 @@ export default function Page() {
                             selectedImage={selectedImages[0] ?? 0}
                             setSelectedImage={(imageId) => handleImageSelect(0, imageId)}
                             placeholder="Sélectionner une image"
-                            images={images}
+                            images={page.flatMap((composant) => composant.imgs)}
                         />
                         <label className="block mb-2">Gros 1 :</label>
                         <input
@@ -732,76 +550,42 @@ export default function Page() {
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
                             placeholder="Gros 1"
-                            onChange={(e) => handleTextChange(2, e.target.value)}
+                            onChange={(e) => handleTextChange(0, e.target.value)}
                         />
                         <label className="block mb-2">Petit 2 :</label>
                         <input
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
                             placeholder="Petit 1"
-                            onChange={(e) => handleTextChange(3, e.target.value)}
+                            onChange={(e) => handleTextChange(1, e.target.value)}
                         />
                         <label className="block mb-2">Gros 3 :</label>
                         <input
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
                             placeholder="Gros 1"
-                            onChange={(e) => handleTextChange(4, e.target.value)}
+                            onChange={(e) => handleTextChange(0, e.target.value)}
                         />
                         <label className="block mb-2">Petit 3 :</label>
                         <input
                             type="text"
                             className="w-full p-2 bg-gray-700 text-white rounded mb-2"
                             placeholder="Petit 1"
-                            onChange={(e) => handleTextChange(5, e.target.value)}
+                            onChange={(e) => handleTextChange(1, e.target.value)}
                         />
                     </div>
-                );
-            case "4":
-                <div className="w-full">
-                    <CustomSelect
-                        selectedValue={selectedCustomData[0].toString() ?? "0"}
-                        setSelectedValue={(value) => handleCustomDataChange(0, parseInt(value))}
-                        options={customData4}
-                        placeholder="Sélectionner une option"
-                    />
-                </div>
+                )
             default:
                 return <div></div>;
         }
     };
 
-    const renderCancelDisclaimer = () => {
-        return (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[60] p-4 mt-[3.45rem]">
-                <div className="bg-gray-800 p-5 rounded-lg w-full max-w-md max-h-full overflow-y-auto text-white">
-                    <h1 className="text-lg font-bold mb-4">Attention, cela supprimera toutes les modifications !</h1>
-                    <div className="flex justify-between gap-4">
-                        <button
-                            className="bg-green-500 hover:bg-green-400 p-2.5 rounded w-full transition"
-                            onClick={() => handleCancelDisclaimerToggle()}
-                        >
-                            Annuler
-                        </button>
-                        <button onClick={() => router.push("/admin/contenu")} className="bg-red-500 hover:bg-red-400 p-2.5 rounded w-full transition">
-                            Continuer
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
-
-    if (!contenu) return <div>Chargement...</div>;
-    if (contenu.idContenu === -1) return <P404 text={"Contenu introuvable"} redirectTo={"/admin/contenu"} />
-
     return (
         <div className="text-white min-h-screen relative">
             {/* Menu de sauvegarde et retour */}
-            <div className={"fixed top[3.45rem] left-0 w-16 h-36 bg-gray-800 flex justify-evenly items-center flex-col rounded-r-2xl z-30"}>
+            <div className={"fixed top[3.45rem] left-0 w-16 h-36 bg-gray-800 flex justify-evenly items-center flex-col z-50 rounded-r-2xl"}>
                 {/* Bouton de retour */}
-                <div onClick={handleCancelDisclaimerToggle} className={"w-14 h-14 rounded-full bg-red-500 hover:bg-red-400 cursor-pointer flex items-center justify-center relative"}>
+                <div className={"w-14 h-14 rounded-full bg-red-500 hover:bg-red-400 cursor-pointer flex items-center justify-center relative"}>
                     <svg fill="#FFFFFF" className="w-7 h-7 text-white cursor-pointer" viewBox="0 0 1024 1024" version="1.1"
                          xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -811,7 +595,8 @@ export default function Page() {
                 </div>
 
                 {/* Bouton de sauvegarde */}
-                <div onClick={saveAndQuit} className={"w-14 h-14 rounded-full bg-green-500 hover:bg-green-400 cursor-pointer flex items-center justify-center relative"}>
+                <div
+                    className={"w-14 h-14 rounded-full bg-green-500 hover:bg-green-400 cursor-pointer flex items-center justify-center relative"}>
                     <svg fill="#FFFFFF" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
                          className="w-7 h-7 text-white cursor-pointer" viewBox="0 0 407.096 407.096">
                         <g>
@@ -827,21 +612,18 @@ export default function Page() {
                 </div>
             </div>
 
-            <div>
-                {/* Bouton vert (ajout) */}
-                <div
-                    onClick={() => handleComposantAddToggle(0)} // Définir l'index cible
-                    className="w-full h-14 flex items-center justify-center text-white relative z-10 mb-5 mt-5"
-                >
-                    <div className="w-14 h-14 rounded-full bg-green-500 hover:bg-green-400 cursor-pointer flex items-center justify-center relative">
-                        <div className="absolute w-1.5 h-8 bg-white"></div>
-                        <div className="absolute w-8 h-1.5 bg-white"></div>
-                    </div>
+            {/* Bouton vert (ajout) */}
+            <div
+                onClick={() => handleComposantAddToggle(0)} // Définit l'index cible
+                className="w-full h-14 flex items-center justify-center rounded-full relative z-10 mt-5"
+            >
+                <div className="w-14 h-14 rounded-full bg-green-500 hover:bg-green-400 cursor-pointer flex items-center justify-center relative mb-5">
+                    <div className="absolute w-1.5 h-8 bg-white"></div>
+                    <div className="absolute w-8 h-1.5 bg-white"></div>
                 </div>
-                {contenu?.page.map(renderComposantsWithEdit)}
             </div>
+            {page.map(renderComposantsWithEdit)}
             {addComposant && renderComposantAdd()}
-            {cancelDisclaimer && renderCancelDisclaimer()}
         </div>
     );
 }

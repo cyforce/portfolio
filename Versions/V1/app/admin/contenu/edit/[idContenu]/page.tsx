@@ -3,12 +3,10 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import CustomImageSelect from "@/components/Contenu/CustomImageSelect";
-import CustomSelect from "@/components/front/CustomSelect";
 import Composant1 from "@/components/composants/1";
 import Composant2 from "@/components/composants/2";
 import Composant3 from "@/components/composants/3";
 import P404 from "@/components/front/p404";
-import ContenuList from "@/components/composants/4";
 
 interface Image {
     idImage: number;
@@ -48,15 +46,9 @@ export default function Page() {
     const [editingIndex, setEditingIndex] = useState(-1);
     const [cancelDisclaimer, setCancelDisclaimer] = useState(false)
     const [idContenu, setIdContenu] = useState(-1)
-    const [selectedCustomData, setSelectedCustomData] = useState<number[]>([]);
 
     const router = useRouter();
     const params = useParams<{ idContenu: string }>() ?? { idContenu: "" };
-
-    const customData4 = [
-        {value: "0", label: "Projet"},
-        {value: "1", label: "Competence"},
-    ];
 
     useEffect(() => {
         const fetchImages = async () => {
@@ -141,19 +133,11 @@ export default function Page() {
 
     const saveAndQuit = async () => {
         try {
-            const pageAuFormatBDD: ComposantDeMerde[] = contenu?.page.map((composant, index) => {
-                const isComposantType4 = composant.type === 4;
-
-                // Si c'est un composant de type 4, ajouter customData
-                const customData = isComposantType4 ? selectedCustomData[index] : null;
-
-                return {
-                    type: composant.type,  // Type du composant
-                    texts: composant.texts,  // Les textes du composant
-                    imgs: composant.imgs.map(img => img.idImage),  // Extraction des IDs d'images
-                    customData: customData, // Ajouter customData ici pour le composant de type 4
-                };
-            }) || [];  // Si contenu?.page est undefined, on retourne un tableau vide
+            const pageAuFormatBDD: ComposantDeMerde[] = contenu?.page.map((composant) => ({
+                type: composant.type,  // Type du composant
+                texts: composant.texts,  // Les textes du composant
+                imgs: composant.imgs.map(img => img.idImage),  // Extraction des IDs d'images
+            })) || [];  // Si contenu?.page est undefined, on retourne un tableau vide
 
             const response = await fetch("/api/contenu/editContenu", {
                 method: "POST",
@@ -161,10 +145,11 @@ export default function Page() {
                     action: 1,
                     idContenu: contenu?.idContenu,
                     page: JSON.stringify(pageAuFormatBDD),
-                }),
+                }), // Conversion en JSON ici
                 headers: { "Content-Type": "application/json" },
             });
 
+            // Vérification de la réponse avant de rediriger
             const data = await response.json();
             if (response.ok) {
                 router.refresh();
@@ -196,14 +181,6 @@ export default function Page() {
             return newTxts;
         });
     };
-
-    const handleCustomDataChange = (index: number, value: number) => {
-        setSelectedCustomData((prev) => {
-            const newCustomData = [...prev];
-            newCustomData[index] = value;
-            return newCustomData;
-        });
-    }
 
     function handleComposantAddToggle(index: number | null = null) {
         setAddComposant(!addComposant);
@@ -472,15 +449,6 @@ export default function Page() {
                         />
                     </div>
                 );
-            case 4:
-                <div className="w-full">
-                    <CustomSelect
-                        selectedValue={selectedCustomData[0].toString() ?? "0"}
-                        setSelectedValue={(value) => handleCustomDataChange(0, parseInt(value))}
-                        options={customData4}
-                        placeholder="Sélectionner une option"
-                    />
-                </div>
             default:
                 return <div></div>;
         }
@@ -578,8 +546,6 @@ export default function Page() {
                 return <Composant2 key={index} texts={composant.texts} imgs={composant.imgs} className={"border-2 border-amber-600"}/>;
             case 3:
                 return <Composant3 key={index} texts={composant.texts} imgs={composant.imgs} className={"border-2 border-amber-600"}/>;
-            case 4:
-                return <ContenuList key={index} contenuType={selectedCustomData[0]} className={"border-2 border-amber-600"}/>;
             default:
                 return <div key={index} className="text-red-500">Type inconnu</div>;
         }
@@ -757,15 +723,6 @@ export default function Page() {
                         />
                     </div>
                 );
-            case "4":
-                <div className="w-full">
-                    <CustomSelect
-                        selectedValue={selectedCustomData[0].toString() ?? "0"}
-                        setSelectedValue={(value) => handleCustomDataChange(0, parseInt(value))}
-                        options={customData4}
-                        placeholder="Sélectionner une option"
-                    />
-                </div>
             default:
                 return <div></div>;
         }

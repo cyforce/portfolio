@@ -30,10 +30,9 @@ interface ContenuBDDTaGrandMere {
 
 interface ContenuListProps {
     contenuType: number;
-    className?: string;
 }
 
-const ContenuList: React.FC<ContenuListProps> = ({ contenuType, className }) => {
+const ContenuList: React.FC<ContenuListProps> = ({ contenuType }) => {
     const [contents, setContents] = useState<Contenu[]>([]);
     const [images, setImages] = useState<Image[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -183,7 +182,7 @@ const ContenuList: React.FC<ContenuListProps> = ({ contenuType, className }) => 
             return (
                 <div
                     key={content.idContenu}
-                    className={`bg-gray-800 text-white max-w-60 shadow-lg rounded-lg  transition-transform transform hover:scale-105`}
+                    className="bg-gray-800 text-white max-w-60 shadow-lg rounded-lg  transition-transform transform hover:scale-105"
                 >
                     {href ? (
                         <a href={href} className="block p-4">
@@ -214,7 +213,7 @@ const ContenuList: React.FC<ContenuListProps> = ({ contenuType, className }) => 
     };
 
     return (
-        <div className={`w-full max-w-4xl mx-auto p-4 ${className}`}>
+        <div className="w-full max-w-4xl mx-auto p-4">
             {/* Champ de recherche */}
             <div className="mb-4 flex items-center justify-evenly">
                 <div className={"w-1/2"}>

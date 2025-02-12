@@ -1,0 +1,21 @@
+/* styles/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Starfield Background */
+body {
+    position: relative;
+    overflow: hidden;
+}
+
+.starfield {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.star {
+    transition: transform 0.1s;
+}
