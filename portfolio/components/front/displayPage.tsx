@@ -20,7 +20,7 @@ interface ComposantData {
     imgs: Image[];
 }
 
-interface ComposantData {
+interface ComposantDataBDD {
     type: number;
     texts: string[];
     imgs: number[];
@@ -93,7 +93,7 @@ const DisplayPage = ({ pageID, mode=0 }: displayPageProps) => {
             }
 
             // Transformation des données pour les rendre compatibles avec ton composant
-            const vraiPage: ComposantData[] = pageData.map((composant: any) => {
+            const vraiPage: ComposantData[] = pageData.map((composant: ComposantDataBDD) => {
                 return {
                     type: composant.type,
                     texts: composant.texts || [],  // Assure-toi que 'texts' existe
