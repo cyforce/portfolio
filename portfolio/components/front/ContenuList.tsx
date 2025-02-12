@@ -130,7 +130,7 @@ const ContenuList: React.FC<ContenuListProps> = ({ contenuType }) => {
         };
 
         fetchContenu();
-    }, [contenuType, images, contents]); // Déclenché après le chargement des images
+    }, [contenuType, images]); // Déclenché après le chargement des images
 
     const filteredContents = contents.filter((content) => {
         const parsedData = content.specificData ? JSON.parse(content.specificData) : {};
