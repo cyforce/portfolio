@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CustomSelect from "@/components/front/CustomSelect";
 import Image from "next/image";
 
@@ -53,10 +53,10 @@ const ContenuList: React.FC<ContenuListProps> = ({ contenuType }) => {
         { value: "1", label: "Intermédiaire" },
         { value: "2", label: "Avancé" },
     ];
-    const types = [
+    const types = useMemo(() => [
         { value: 0, label: "projets" },
         { value: 1, label: "competences" },
-    ];
+    ], []);
 
     useEffect(() => {
         const type = types.find((type) => type.value === contenuType);

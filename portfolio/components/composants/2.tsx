@@ -35,7 +35,6 @@ export default function Composant2({ texts, imgs, className }: Composant & { cla
                 </div>
             </div>
             {/* Image */}
-            <img src={imageUrl} alt={imgs[0].alt} className="h-full w-1/2 object-cover" />
             <Image src={imageUrl} alt={imgs[0].alt} className={"h-full w-1/2 object-cover"} />
         </div>
     );

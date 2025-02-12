@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import AddContentForm from "@/components/Contenu/AddContentForm";
@@ -63,8 +63,7 @@ export default function AdminContentPage() {
         {value: "2", label: "Page classique"},
     ];
 
-    // Récupérer les contenus depuis l'API
-    const fetchContenus = async () => {
+    const fetchContenus = useCallback(async () => {
         try {
             const res = await fetch("/api/contenu/getContenu", {
                 method: "POST",
@@ -73,19 +72,17 @@ export default function AdminContentPage() {
                     titre: searchTerm,
                     type: selectedType === "" ? undefined : selectedType,
                 }),
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
             });
             const data = await res.json();
             setContenus(data);
         } catch (error) {
             console.error("Erreur lors de la récupération des contenus:", error);
         }
-    };
+    }, [searchTerm, selectedType]);
 
     // Récupérer les images depuis l'API
-    const fetchImages = async () => {
+    const fetchImages = useCallback(async () => {
         try {
             const res = await fetch("/api/images/getImages");
             const data = await res.json();
@@ -93,13 +90,13 @@ export default function AdminContentPage() {
         } catch (error) {
             console.error("Erreur lors de la récupération des images:", error);
         }
-    };
+    }, []); // ✅ Pas de dépendances, donc pas de recréation
 
     // Effectuer les appels au démarrage et quand les filtres sont modifiés
     useEffect(() => {
         fetchContenus();
         fetchImages();
-    }, [searchTerm, selectedType, fetchContenus, fetchImages]);
+    }, [fetchContenus, fetchImages]); // ✅ `useCallback` empêche les changements inutiles
 
     // Fonction pour afficher le formulaire d'ajout
     const handleAddContent = () => {

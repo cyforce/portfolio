@@ -80,11 +80,10 @@ const CustomImageSelect = ({ selectedImage, setSelectedImage, placeholder }: Cus
                                     className="cursor-pointer hover:scale-105 transition-transform duration-200"
                                     onClick={() => handleSelect(image.idImage)} // Passer l'ID de l'image
                                 >
-                                    <img
+                                    <Image
                                         src={`/Images/${image.url}`}
                                         alt={image.alt}
-                                        className="w-full h-24 object-cover rounded-lg border border-gray-600"
-                                    />
+                                        className={"w-full h-24 object-cover rounded-lg border border-gray-600"}/>
                                 </div>
                             ))}
                         </div>
