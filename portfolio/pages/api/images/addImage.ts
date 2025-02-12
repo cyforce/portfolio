@@ -45,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // Génération d'un nom unique
         const newFileName = `${uuidv4()}${path.extname(uploadedFile.originalFilename)}`;
-        const newFilePath = path.join(process.cwd(), 'public', 'images', newFileName);
+        const newFilePath = path.join(process.cwd(), 'uploads', newFileName);
 
         // Copie du fichier (au lieu de renameSync)
         fs.copyFileSync(uploadedFile.filepath, newFilePath);

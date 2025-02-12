@@ -93,7 +93,7 @@ export default function ImagesPage() {
                                     className="bg-gray-800 rounded p-2 flex flex-col items-center"
                                 >
                                     <span className="block mb-2">ID: {image.idImage}</span>
-                                    <Image src={`/images/${image.url}`} alt={image.alt} className={"w-32 h-32 object-cover rounded mb-2"} />
+                                    <Image src={`/api/images/${image.url}`} alt={image.alt} className={"w-32 h-32 object-cover rounded mb-2"} />
                                     <button
                                         onClick={() => handleDelete(image.idImage)}
                                         className="bg-red-500 px-3 py-1 text-white rounded text-sm hover:bg-red-400"
