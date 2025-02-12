@@ -48,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }
 
                 let SQL = "UPDATE Contenu SET ";
-                let edits: (string | number)[] = [];
+                const edits: (string | number)[] = [];
 
                 if (params.titre) {
                     SQL += "titre = ?, ";
