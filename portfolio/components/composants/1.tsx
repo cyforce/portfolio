@@ -13,7 +13,7 @@ export default function Composant1({ texts, imgs, className }: Composant & { cla
     // Vérification et construction du chemin de l'image
     // const imageUrl = imgs.length > 0 ? `/images/${imgs[0]}.jpg` : "/images/placeholder.jpg";
 
-    const imageUrl = `/images/${imgs[0].url}`;
+    const imageUrl = `/api/images/${imgs[0].url}`;
 
     return (
         <div

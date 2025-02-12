@@ -104,7 +104,7 @@ const ContenuList: React.FC<ContenuListProps> = ({ contenuType }) => {
                         const foundImage = images.find((img) => img.idImage === content.imagePrincContenu);
 
                         if (foundImage && !foundImage.url.startsWith('/images/')) {
-                            foundImage.url = `/images/${foundImage.url}`;
+                            foundImage.url = `/api/images/${foundImage.url}`;
                         }
 
                         console.log("Image trouvée pour le contenu", content.idContenu, ":", foundImage);

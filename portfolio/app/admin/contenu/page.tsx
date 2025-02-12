@@ -266,7 +266,7 @@ export default function AdminContentPage() {
                     contenus.map((contenu) => {
                         // Recherche de l'image correspondante à l'ID de l'image
                         const image = images.find(img => img.idImage === contenu.imagePrincContenu);
-                        const imageUrl = image ? `/images/${image.url}` : "/images/placholder1.jpg";
+                        const imageUrl = image ? `/api/images/${image.url}` : "/images/placholder1.jpg";
                         return (
                             <div key={contenu.idContenu} className="bg-gray-800 rounded p-4 w-96">
                                 <Image src={imageUrl} alt={image ? image.alt : "Image de contenu"} className={"w-full h-32 object-cover rounded"}/>

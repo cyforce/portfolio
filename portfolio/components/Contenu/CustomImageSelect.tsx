@@ -63,7 +63,7 @@ const CustomImageSelect = ({ selectedImage, setSelectedImage, placeholder }: Cus
                 onClick={toggleDropdown}
             >
                 {selectedImage && selectedImageData ? (
-                    <Image src={`/Images/${selectedImageData.url}`} alt={selectedImageData.alt} className={"w-40 h-40 object-cover rounded-lg border border-gray-500 shadow-lg"}/>
+                    <Image src={`/api/images/${selectedImageData.url}`} alt={selectedImageData.alt} className={"w-40 h-40 object-cover rounded-lg border border-gray-500 shadow-lg"}/>
                 ) : (
                     <span className="text-gray-400">{placeholder}</span>
                 )}
@@ -81,7 +81,7 @@ const CustomImageSelect = ({ selectedImage, setSelectedImage, placeholder }: Cus
                                     onClick={() => handleSelect(image.idImage)} // Passer l'ID de l'image
                                 >
                                     <Image
-                                        src={`/Images/${image.url}`}
+                                        src={`/api/images/${image.url}`}
                                         alt={image.alt}
                                         className={"w-full h-24 object-cover rounded-lg border border-gray-600"}/>
                                 </div>

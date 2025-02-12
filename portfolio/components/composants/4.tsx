@@ -15,7 +15,7 @@ export default function Composant4({ texts, imgs, className }: Composant & { cla
     // Vérification et construction du chemin de l'image
     // const imageUrl = imgs.length > 0 ? `/images/${imgs[0]}.jpg` : "/images/placeholder.jpg";
 
-    const imageUrl = "/images/nebuleuse-coloree-etoiles-nebuleuse-arriere-plan_910054-24675.jpg";
+    const imageUrl = `/api/images/${imgs[0].url}`;
 
     return (
         <div className={`w-screen h-[calc(100vh-3.45rem)] flex items-center justify-center text-white relative z-10 mb-3 ${className}`}>
