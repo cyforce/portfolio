@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import CustomSelect from "@/components/front/CustomSelect";
+import Image from "next/image";
 
 interface Image {
     idImage: number;
@@ -15,6 +16,15 @@ interface Contenu {
     description: string;
     specificData: string;
     imagePrincContenu: Image;
+    type: number;
+}
+
+interface ContenuBDDTaGrandMere {
+    idContenu: number;
+    titre: string;
+    description: string;
+    specificData: string;
+    imagePrincContenu: number;
     type: number;
 }
 
@@ -51,7 +61,7 @@ const ContenuList: React.FC<ContenuListProps> = ({ contenuType }) => {
     useEffect(() => {
         const type = types.find((type) => type.value === contenuType);
         setType(type ? type.label : "");
-    }, [contenuType]);
+    }, [contenuType, types]);
 
     // Récupération des images
     useEffect(() => {
@@ -90,7 +100,7 @@ const ContenuList: React.FC<ContenuListProps> = ({ contenuType }) => {
                 console.log("✅ Contenus récupérés :", data);
 
                 if (Array.isArray(data)) {
-                    const formattedContents = data.map((content: any) => {
+                    const formattedContents = data.map((content: ContenuBDDTaGrandMere) => {
                         const foundImage = images.find((img) => img.idImage === content.imagePrincContenu);
 
                         if (foundImage && !foundImage.url.startsWith('/images/')) {
@@ -120,10 +130,10 @@ const ContenuList: React.FC<ContenuListProps> = ({ contenuType }) => {
         };
 
         fetchContenu();
-    }, [contenuType, images]); // Déclenché après le chargement des images
+    }, [contenuType, images, contents]); // Déclenché après le chargement des images
 
     const filteredContents = contents.filter((content) => {
-        let parsedData = content.specificData ? JSON.parse(content.specificData) : {};
+        const parsedData = content.specificData ? JSON.parse(content.specificData) : {};
 
         // console.log("🔍 Contenu analysé :", parsedData);
         // console.log("✅ Niveau stocké :", parsedData.level, " | Type :", typeof parsedData.level);
@@ -157,7 +167,7 @@ const ContenuList: React.FC<ContenuListProps> = ({ contenuType }) => {
 
             return (
                 <p className="text-white">
-                    <span className="font-bold">Cadre d'apprentissage:</span> {cadre ? cadre.label : "Inconnu"}
+                    <span className="font-bold">Cadre d&apos;apprentissage:</span> {cadre ? cadre.label : "Inconnu"}
                     <br/>
                     <span className="font-bold">Niveau:</span> {level ? level.label : "Inconnu"}
                 </p>
@@ -176,10 +186,10 @@ const ContenuList: React.FC<ContenuListProps> = ({ contenuType }) => {
                 >
                     {href ? (
                         <a href={href} className="block p-4">
-                            <img
+                            <Image
                                 src={content.imagePrincContenu.url}
                                 alt={content.imagePrincContenu.alt}
-                                className="w-full h-48 object-cover rounded-lg mb-3"
+                                className={"w-full h-48 object-cover rounded-lg mb-3"}
                             />
                             <h3 className="text-lg font-semibold">{content.titre}</h3>
                             <p className="text-sm">{content.description}</p>
@@ -187,10 +197,10 @@ const ContenuList: React.FC<ContenuListProps> = ({ contenuType }) => {
                         </a>
                     ) : (
                         <>
-                            <img
+                            <Image
                                 src={content.imagePrincContenu.url}
                                 alt={content.imagePrincContenu.alt}
-                                className="w-full h-48 object-cover rounded-lg mb-3"
+                                className={"w-full h-48 object-cover rounded-lg mb-3"}
                             />
                             <h3 className="text-lg font-semibold">{content.titre}</h3>
                             <p className="text-sm">{content.description}</p>

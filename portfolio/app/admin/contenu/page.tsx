@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import AddContentForm from "@/components/Contenu/AddContentForm";
 import EditContentForm from "@/components/Contenu/EditContentForm";
 import CustomSelect from "@/components/front/CustomSelect";
@@ -98,7 +99,7 @@ export default function AdminContentPage() {
     useEffect(() => {
         fetchContenus();
         fetchImages();
-    }, [searchTerm, selectedType]);
+    }, [searchTerm, selectedType, fetchContenus, fetchImages]);
 
     // Fonction pour afficher le formulaire d'ajout
     const handleAddContent = () => {
@@ -216,7 +217,7 @@ export default function AdminContentPage() {
                 <p className="text-sm mt-2">
                     <span className={"font-bold"}>Type:</span> {type ? type.label : "Inconnu"}
                     <br/>
-                    <span className="font-bold">Cadre d'apprentissage:</span> {cadre ? cadre.label : "Inconnu"}
+                    <span className="font-bold">Cadre d&apos;apprentissage:</span> {cadre ? cadre.label : "Inconnu"}
                     <br/>
                     <span className="font-bold">Niveau:</span> {level ? level.label : "Inconnu"}
                 </p>
@@ -271,11 +272,7 @@ export default function AdminContentPage() {
                         const imageUrl = image ? `/images/${image.url}` : "/images/placholder1.jpg";
                         return (
                             <div key={contenu.idContenu} className="bg-gray-800 rounded p-4 w-96">
-                                <img
-                                    src={imageUrl}
-                                    alt={image ? image.alt : "Image de contenu"}
-                                    className="w-full h-32 object-cover rounded"
-                                />
+                                <Image src={imageUrl} alt={image ? image.alt : "Image de contenu"} className={"w-full h-32 object-cover rounded"}/>
                                 <h2 className="text-xl font-bold overflow-hidden">{contenu.titre}</h2>
                                 <p className="text-sm whitespace-normal break-words overflow-wrap">{contenu.description}</p>
                                 {renderSpecificData(contenu)}

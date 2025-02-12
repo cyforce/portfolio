@@ -1,42 +1,51 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import mysql from 'mysql2/promise';
-import bcrypt from 'bcrypt'; // Importation de bcryptjs
+import mysql, { ResultSetHeader } from 'mysql2/promise';
+import bcrypt from 'bcrypt';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method === 'POST') {
-        const { username, password, role } = req.body;
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Méthode non autorisée' });
+    }
 
-        if (!username || !password || !role) {
-            return res.status(400).json({ error: 'Missing required fields' });
+    const { username, password, role } = req.body;
+
+    if (!username || !password || !role) {
+        return res.status(400).json({ error: 'Tous les champs sont requis.' });
+    }
+
+    let connection;
+
+    try {
+        // Hachage du mot de passe avec bcrypt
+        const hashedPassword = await bcrypt.hash(password, 10); // 10 rounds
+
+        // Connexion à la base de données
+        connection = await mysql.createConnection({
+            host: process.env.DB_HOST,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASS,
+            database: process.env.DB_NAME,
+        });
+
+        // Exécution de la requête d'insertion
+        const [result] = await connection.execute<ResultSetHeader>(
+            "INSERT INTO Users (username, password, role) VALUES (?, ?, ?)",
+            [username, hashedPassword, role]
+        );
+
+        // Vérification que l'utilisateur a bien été inséré
+        if (result.affectedRows === 0) {
+            throw new Error("Échec de l'insertion de l'utilisateur.");
         }
 
-        try {
-            // Hachage du mot de passe avec bcryptjs
-            const hashedPassword = await bcrypt.hash(password, 10);  // 10 est le nombre de tours de hachage, ce qui est raisonnable
+        res.status(201).json({ message: 'Utilisateur ajouté avec succès.' });
 
-            // Créer une connexion à la base de données
-            const connection = await mysql.createConnection({
-                host: process.env.DB_HOST,
-                user: process.env.DB_USER,
-                password: process.env.DB_PASS,
-                database: process.env.DB_NAME,
-            });
-
-            // Exécution de la requête d'insertion dans la base de données
-            const [result] = await connection.execute(
-                "INSERT INTO Users (username, password, role) VALUES (?, ?, ?)",
-                [username, hashedPassword, role]
-            );
-
-            // Fermer la connexion
-            await connection.end();
-
-            res.status(200).json({ message: 'User added successfully' });
-        } catch (error) {
-            console.error("Error adding user:", error);
-            res.status(500).json({ error: 'Unable to add user' });
+    } catch (error) {
+        console.error("Erreur lors de l'ajout de l'utilisateur :", error);
+        res.status(500).json({ error: 'Impossible d’ajouter l’utilisateur.' });
+    } finally {
+        if (connection) {
+            await connection.end(); // Fermeture propre de la connexion
         }
-    } else {
-        res.status(405).json({ error: 'Method Not Allowed' });
     }
 }

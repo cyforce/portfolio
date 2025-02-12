@@ -72,7 +72,7 @@ export default function Page() {
         }
 
         setIdContenu(parseInt(params.idContenu));
-    }, [params.idContenu]); // Exécuter lorsque `idContenu` change
+    }, [params.idContenu, router]); // Exécuter lorsque `idContenu` change
 
     useEffect(() => {
         if (!idContenu || images.length === 0) return; // Attendre que `idContenu` et `images` soient chargés

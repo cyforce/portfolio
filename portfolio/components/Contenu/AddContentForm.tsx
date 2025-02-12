@@ -182,7 +182,7 @@ const AddContentForm = ({ images, onCancel, onSuccess }: AddContentFormProps) =>
                     {selectedType == "1" && (
                         <div className="space-y-2">
                             <div className="space-y-2">
-                                <div className="text-white">Cadre d'apprentissage</div>
+                                <div className="text-white">Cadre d&apos;apprentissage</div>
                                 <CustomSelect
                                     selectedValue={selectedCadre}
                                     setSelectedValue={setSelectedCadre}

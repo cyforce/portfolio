@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import AddImageForm from "@/components/Contenu/addImageForm";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface Image {
     idImage: number;
@@ -12,7 +13,6 @@ interface Image {
 
 export default function ImagesPage() {
     const [images, setImages] = useState<Image[]>([]);
-    const [search, setSearch] = useState("");
     const [selectedForm, setSelectedForm] = useState<"add" | null>(null);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
@@ -87,19 +87,13 @@ export default function ImagesPage() {
             <div className="max-h-[500px] overflow-y-auto">
                 <div className="flex flex-wrap gap-4 justify-center">
                     {Array.isArray(images) &&
-                        images
-                            .filter((image) => image.idImage.toString().includes(search))
-                            .map((image) => (
+                        images.map((image) => (
                                 <div
                                     key={image.idImage}
                                     className="bg-gray-800 rounded p-2 flex flex-col items-center"
                                 >
                                     <span className="block mb-2">ID: {image.idImage}</span>
-                                    <img
-                                        src={`/images/${image.url}`}
-                                        alt={image.alt}
-                                        className="w-32 h-32 object-cover rounded mb-2"
-                                    />
+                                    <Image src={`/images/${image.url}`} alt={image.alt} className={"w-32 h-32 object-cover rounded mb-2"} />
                                     <button
                                         onClick={() => handleDelete(image.idImage)}
                                         className="bg-red-500 px-3 py-1 text-white rounded text-sm hover:bg-red-400"

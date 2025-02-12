@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import mysql, {RowDataPacket} from 'mysql2/promise';
+import mysql, { RowDataPacket } from 'mysql2/promise';
 
 async function connect() {
     return mysql.createConnection({
@@ -15,15 +15,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(405).json({ error: 'Méthode non autorisée. Utilisez POST.' });
     }
 
-    // console.log("Received request body:", req.body);
-
     const params = req.body;
 
     try {
         const connection = await connect();
 
         switch (params.action) {
-            case 0: // Récupérer un contenu par ID
+            case 0: { // Récupérer un contenu par ID
                 if (!params.id) {
                     await connection.end();
                     return res.status(400).json({ error: "L'ID du contenu est requis." });
@@ -34,18 +32,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     [params.id]
                 );
 
-                if (content.length === 0) {
-                    await connection.end();
+                await connection.end();
+
+                if ((content as RowDataPacket[]).length === 0) {
                     return res.status(404).json({ error: "Contenu non trouvé." });
                 }
 
-                await connection.end();
                 return res.status(200).json(content);
+            }
 
-            case 1: // Rechercher du contenu avec des critères (titre et/ou type)
-                let SQL = "SELECT idContenu, titre, description, type, imagePrincContenu, specificData FROM Contenu WHERE ";
-                let whereClauses = [];
-                let values: any[] = [];
+            case 1: { // Rechercher du contenu avec des critères (titre et/ou type)
+                let sql = "SELECT idContenu, titre, description, type, imagePrincContenu, specificData FROM Contenu";
+                const whereClauses: string[] = [];
+                const values: (string | number)[] = [];
 
                 if (params.titre) {
                     whereClauses.push("UPPER(titre) LIKE UPPER(?)");
@@ -56,22 +55,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     values.push(params.type);
                 }
 
-                if (whereClauses.length === 0) {
-                    SQL = "SELECT idContenu, titre, description, type, imagePrincContenu, specificData FROM Contenu";
-                } else {
-                    SQL += whereClauses.join(" AND ");
+                if (whereClauses.length > 0) {
+                    sql += " WHERE " + whereClauses.join(" AND ");
                 }
 
-                // console.log("Executing SQL query:", SQL, values);
-
-                const [results] = await connection.execute(SQL, values);
+                const [results] = await connection.execute<RowDataPacket[]>(sql, values);
                 await connection.end();
-                return res.status(200).json(results);
 
-            default: // Récupérer tout le contenu
-                const [allContent] = await connection.execute("SELECT * FROM Contenu");
+                return res.status(200).json(results);
+            }
+
+            default: { // Récupérer tout le contenu
+                const [allContent] = await connection.execute<RowDataPacket[]>("SELECT * FROM Contenu");
                 await connection.end();
                 return res.status(200).json(allContent);
+            }
         }
     } catch (error) {
         console.error("Erreur lors de la récupération des données :", error);

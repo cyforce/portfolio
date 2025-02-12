@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 
 interface Image {
     idImage: number;
@@ -62,11 +63,7 @@ const CustomImageSelect = ({ selectedImage, setSelectedImage, placeholder }: Cus
                 onClick={toggleDropdown}
             >
                 {selectedImage && selectedImageData ? (
-                    <img
-                        src={`/Images/${selectedImageData.url}`}
-                        alt={selectedImageData.alt}
-                        className="w-40 h-40 object-cover rounded-lg border border-gray-500 shadow-lg"
-                    />
+                    <Image src={`/Images/${selectedImageData.url}`} alt={selectedImageData.alt} className={"w-40 h-40 object-cover rounded-lg border border-gray-500 shadow-lg"}/>
                 ) : (
                     <span className="text-gray-400">{placeholder}</span>
                 )}

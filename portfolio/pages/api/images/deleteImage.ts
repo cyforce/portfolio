@@ -1,5 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import mysql from 'mysql2/promise';
+import mysql, { RowDataPacket } from 'mysql2/promise';
+import fs from 'fs';
+import path from 'path';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {
@@ -21,7 +23,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
 
         // Récupérer l'URL de l'image avant suppression
-        const [rows]: any = await connection.execute("SELECT url FROM Image WHERE idImage = ?", [idImage]);
+        const [rows] = await connection.execute<RowDataPacket[]>(
+            "SELECT url FROM Image WHERE idImage = ?",
+            [idImage]
+        );
+
         if (rows.length === 0) {
             await connection.end();
             return res.status(404).json({ error: "Image non trouvée" });
@@ -34,8 +40,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         await connection.end();
 
         // Supprimer l'image du dossier public/images
-        const fs = require("fs");
-        const path = require("path");
         const imagePath = path.join(process.cwd(), "public", "images", imageUrl);
         if (fs.existsSync(imagePath)) {
             fs.unlinkSync(imagePath);

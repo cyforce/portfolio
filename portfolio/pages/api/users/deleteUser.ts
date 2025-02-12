@@ -1,6 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import mysql from 'mysql2/promise';
 
+interface DeleteResult {
+    affectedRows: number;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === 'DELETE') {
         const { id } = req.query;
@@ -27,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             // Fermer la connexion
             await connection.end();
 
-            if ((result as any).affectedRows === 0) {
+            if ((result as DeleteResult).affectedRows === 0) {
                 return res.status(404).json({ error: 'User not found' });
             }
 

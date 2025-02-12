@@ -40,18 +40,18 @@ const EditContentForm = ({ images, contentToEdit, onCancel, onSuccess }: EditCon
         setDescription(contentToEdit.description);
         setSelectedType(contentToEdit.type.toString());  // Assure-toi que type est une chaîne
         setSelectedImage(contentToEdit.imagePrincContenu);
-        let specificDataJSON = JSON.parse(contentToEdit.specificData);
+        const specificDataJSON = JSON.parse(contentToEdit.specificData);
         if (selectedType === "0") {
             setSelectedCadreProj(specificDataJSON.cadre);
         } else if (selectedType === "1") {
             setSelectedCadre(specificDataJSON.cadre);
             setSelectedLevel(specificDataJSON.level);
         }
-    }, [contentToEdit]);
+    }, [contentToEdit, selectedType]);
 
-    const consoleContentToEdit = () => {
-        console.log(contentToEdit);
-    }
+    // const consoleContentToEdit = () => {
+    //     console.log(contentToEdit);
+    // }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -115,7 +115,7 @@ const EditContentForm = ({ images, contentToEdit, onCancel, onSuccess }: EditCon
                 setErrorMessage("Une erreur est survenue lors de la modification.");
             }
         } catch (error) {
-            setErrorMessage("Une erreur est survenue lors de la modification.");
+            setErrorMessage("Une erreur est survenue lors de la modification : " + error);
         } finally {
             setIsSubmitting(false);
         }
@@ -203,7 +203,7 @@ const EditContentForm = ({ images, contentToEdit, onCancel, onSuccess }: EditCon
                     {selectedType === "1" && (
                         <div className="space-y-2">
                             <div className="space-y-2">
-                                <div className="text-white">Cadre d'apprentissage</div>
+                                <div className="text-white">Cadre d&apos;apprentissage</div>
                                 <CustomSelect
                                     selectedValue={selectedCadre}
                                     setSelectedValue={setSelectedCadre}

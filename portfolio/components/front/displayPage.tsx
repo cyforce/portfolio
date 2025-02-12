@@ -20,6 +20,12 @@ interface ComposantData {
     imgs: Image[];
 }
 
+interface ComposantData {
+    type: number;
+    texts: string[];
+    imgs: number[];
+}
+
 interface Contenu {
     idContenu: number;
     titre: string;
